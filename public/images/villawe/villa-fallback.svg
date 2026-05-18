@@ -1,0 +1,6 @@
+<svg width="800" height="600" viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="600" fill="#F1F3F4"/>
+  <rect x="100" y="150" width="600" height="300" rx="36" fill="#FAF8F3"/>
+  <rect x="180" y="220" width="440" height="140" rx="28" fill="#D2E0E9"/>
+  <text x="214" y="430" fill="#203A4F" font-family="Arial, sans-serif" font-size="44">Villawe Placeholder</text>
+</svg>

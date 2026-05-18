@@ -1,0 +1,15 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="630" fill="#F7F3EC"/>
+  <rect x="54" y="54" width="1092" height="522" rx="42" fill="url(#paint0_linear)"/>
+  <rect x="108" y="116" width="164" height="164" rx="32" fill="#132D44"/>
+  <path d="M164 178L190 232L216 178" stroke="#F7F3EC" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="108" y="372" fill="#132D44" font-family="Georgia, serif" font-size="68" font-weight="600">Villawe</text>
+  <text x="108" y="438" fill="#486172" font-family="Arial, sans-serif" font-size="28">Verified, transparent, premium villa discovery</text>
+  <text x="108" y="496" fill="#486172" font-family="Arial, sans-serif" font-size="28">Platform dışı ödeme yapmayın • Şeffaf fiyat görün</text>
+  <defs>
+    <linearGradient id="paint0_linear" x1="112" y1="110" x2="1089" y2="525" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFF9F1"/>
+      <stop offset="1" stop-color="#D8E4EA"/>
+    </linearGradient>
+  </defs>
+</svg>
