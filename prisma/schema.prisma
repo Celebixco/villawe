@@ -1,0 +1,889 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserStatus {
+  ACTIVE
+  INVITED
+  SUSPENDED
+  DISABLED
+}
+
+enum OwnerType {
+  INDIVIDUAL
+  AGENCY
+}
+
+enum VillaStatus {
+  DRAFT
+  PENDING_REVIEW
+  PUBLISHED
+  SUSPENDED
+  ARCHIVED
+}
+
+enum VerificationStatus {
+  PENDING
+  PARTIALLY_VERIFIED
+  VERIFIED
+  REJECTED
+}
+
+enum ServiceFeeType {
+  NONE
+  FIXED
+  PERCENTAGE
+  INCLUDED
+}
+
+enum AvailabilityBlockType {
+  BLOCKED
+  HOLD
+  RESERVED
+  MAINTENANCE
+  OWNER_USE
+}
+
+enum BookingStatus {
+  PENDING
+  HOLD
+  CONFIRMED
+  CANCELLED
+  EXPIRED
+  COMPLETED
+}
+
+enum InquiryStatus {
+  NEW
+  REVIEWING
+  QUOTED
+  ACCEPTED
+  DECLINED
+  EXPIRED
+  CONVERTED
+  SPAM
+}
+
+enum ReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  HIDDEN
+}
+
+enum UploadedFileKind {
+  IMAGE
+  DOCUMENT
+  AVATAR
+  OTHER
+}
+
+enum SeoPageType {
+  REGION
+  CONCEPT
+  LANDING
+  BLOG
+  CUSTOM
+}
+
+enum RedirectType {
+  PERMANENT
+  TEMPORARY
+}
+
+enum BlogPostStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum MessageSenderType {
+  GUEST
+  ADMIN
+  OWNER
+}
+
+enum ReplyAuthorType {
+  ADMIN
+  OWNER
+}
+
+enum PricingRuleType {
+  EXTRA_GUEST
+  MIN_NIGHTS
+  WEEKEND
+  LENGTH_OF_STAY
+  MANUAL
+}
+
+model User {
+  id               String         @id @default(cuid())
+  email            String         @unique
+  passwordHash     String?        @map("password_hash")
+  firstName        String         @map("first_name")
+  lastName         String         @map("last_name")
+  phone            String?
+  status           UserStatus     @default(ACTIVE)
+  lastLoginAt      DateTime?      @map("last_login_at")
+  createdAt        DateTime       @default(now()) @map("created_at")
+  updatedAt        DateTime       @updatedAt @map("updated_at")
+  adminProfile     AdminUser?
+  ownerProfile     Owner?
+  userRoles        UserRole[]
+  favorites        Favorite[]
+  comparisons      Comparison[]
+  inquiries        Inquiry[]
+  bookings         Booking[]
+  blogPosts        BlogPost[]
+  reviews          Review[]
+  uploadedFiles    UploadedFile[]
+  auditLogs        AuditLog[]     @relation("AuditActor")
+  verifiedOwners   OwnerDocument[] @relation("OwnerDocumentVerifier")
+  verifiedVillas   VillaDocument[] @relation("VillaDocumentVerifier")
+  villaChecks      VillaVerification[] @relation("VillaVerificationAdmin")
+  availabilityLogs AvailabilityBlock[] @relation("AvailabilityCreatedByAdmin")
+  settings         Setting[]      @relation("SettingUpdatedBy")
+
+  @@map("users")
+}
+
+model Role {
+  id          String     @id @default(cuid())
+  key         String     @unique
+  name        String
+  description String?
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
+  userRoles   UserRole[]
+
+  @@map("roles")
+}
+
+model UserRole {
+  userId     String   @map("user_id")
+  roleId     String   @map("role_id")
+  assignedAt DateTime @default(now()) @map("assigned_at")
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role       Role     @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([userId, roleId])
+  @@map("user_roles")
+}
+
+model AdminUser {
+  id          String   @id @default(cuid())
+  userId      String   @unique @map("user_id")
+  title       String?
+  isSuperAdmin Boolean @default(false) @map("is_super_admin")
+  lastSeenAt  DateTime? @map("last_seen_at")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("admin_users")
+}
+
+model Owner {
+  id           String          @id @default(cuid())
+  userId       String?         @unique @map("user_id")
+  type         OwnerType       @default(INDIVIDUAL)
+  displayName  String          @map("display_name")
+  legalName    String?         @map("legal_name")
+  contactName  String?         @map("contact_name")
+  email        String
+  phone        String
+  taxNumber    String?         @map("tax_number")
+  notes        String?
+  isActive     Boolean         @default(true) @map("is_active")
+  createdAt    DateTime        @default(now()) @map("created_at")
+  updatedAt    DateTime        @updatedAt @map("updated_at")
+  user         User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
+  documents    OwnerDocument[]
+  villas       Villa[]
+
+  @@index([email])
+  @@map("owners")
+}
+
+model UploadedFile {
+  id            String           @id @default(cuid())
+  storageKey    String           @unique @map("storage_key")
+  bucket        String
+  url           String
+  originalName  String           @map("original_name")
+  mimeType      String           @map("mime_type")
+  sizeBytes     Int              @map("size_bytes")
+  kind          UploadedFileKind
+  width         Int?
+  height        Int?
+  altText       String?          @map("alt_text")
+  checksum      String?
+  createdByUserId String?        @map("created_by_user_id")
+  createdAt     DateTime         @default(now()) @map("created_at")
+  createdByUser User?            @relation(fields: [createdByUserId], references: [id], onDelete: SetNull)
+  ownerDocuments OwnerDocument[]
+  villaMedia    VillaMedia[]
+  villaDocuments VillaDocument[]
+  blogCoverFor  BlogPost[]       @relation("BlogCoverImage")
+  blogOgFor     BlogPost[]       @relation("BlogOgImage")
+
+  @@index([kind, createdAt])
+  @@map("uploaded_files")
+}
+
+model OwnerDocument {
+  id                String       @id @default(cuid())
+  ownerId           String       @map("owner_id")
+  fileId            String       @map("file_id")
+  documentType      String       @map("document_type")
+  note              String?
+  isVerified        Boolean      @default(false) @map("is_verified")
+  verifiedAt        DateTime?    @map("verified_at")
+  verifiedByAdminId String?      @map("verified_by_admin_id")
+  createdAt         DateTime     @default(now()) @map("created_at")
+  owner             Owner        @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  file              UploadedFile @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  verifiedByAdmin   User?        @relation("OwnerDocumentVerifier", fields: [verifiedByAdminId], references: [id], onDelete: SetNull)
+
+  @@index([ownerId, documentType])
+  @@index([isVerified, createdAt])
+  @@map("owner_documents")
+}
+
+model Region {
+  id               String      @id @default(cuid())
+  name             String
+  slug             String      @unique
+  shortDescription String?     @map("short_description")
+  seoTitle         String?     @map("seo_title")
+  seoDescription   String?     @map("seo_description")
+  sortOrder        Int         @default(0) @map("sort_order")
+  isFeatured       Boolean     @default(false) @map("is_featured")
+  createdAt        DateTime    @default(now()) @map("created_at")
+  updatedAt        DateTime    @updatedAt @map("updated_at")
+  districts        District[]
+  villas           Villa[]
+
+  @@map("regions")
+}
+
+model District {
+  id             String        @id @default(cuid())
+  regionId       String        @map("region_id")
+  name           String
+  slug           String        @unique
+  seoTitle       String?       @map("seo_title")
+  seoDescription String?       @map("seo_description")
+  isFeatured     Boolean       @default(false) @map("is_featured")
+  createdAt      DateTime      @default(now()) @map("created_at")
+  updatedAt      DateTime      @updatedAt @map("updated_at")
+  region         Region        @relation(fields: [regionId], references: [id], onDelete: Cascade)
+  neighborhoods  Neighborhood[]
+  villas         Villa[]
+
+  @@map("districts")
+}
+
+model Neighborhood {
+  id         String    @id @default(cuid())
+  districtId String    @map("district_id")
+  name       String
+  slug       String    @unique
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+  district   District  @relation(fields: [districtId], references: [id], onDelete: Cascade)
+  villas     Villa[]
+
+  @@map("neighborhoods")
+}
+
+model Concept {
+  id          String         @id @default(cuid())
+  name        String
+  slug        String         @unique
+  description String?
+  sortOrder   Int            @default(0) @map("sort_order")
+  isFeatured  Boolean        @default(false) @map("is_featured")
+  createdAt   DateTime       @default(now()) @map("created_at")
+  updatedAt   DateTime       @updatedAt @map("updated_at")
+  villas      VillaConcept[]
+
+  @@map("concepts")
+}
+
+model Amenity {
+  id               String         @id @default(cuid())
+  name             String
+  slug             String         @unique
+  category         String
+  icon             String?
+  isFeaturedFilter Boolean        @default(false) @map("is_featured_filter")
+  createdAt        DateTime       @default(now()) @map("created_at")
+  updatedAt        DateTime       @updatedAt @map("updated_at")
+  villas           VillaAmenity[]
+
+  @@map("amenities")
+}
+
+model CancellationPolicy {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  summary     String
+  details     String
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  villas      Villa[]
+
+  @@map("cancellation_policies")
+}
+
+model DepositPolicy {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  summary     String
+  details     String
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  villas      Villa[]
+
+  @@map("deposit_policies")
+}
+
+model Villa {
+  id                     String               @id @default(cuid())
+  slug                   String               @unique
+  title                  String
+  shortDescription       String               @map("short_description")
+  description            String
+  status                 VillaStatus          @default(DRAFT)
+  ownerId                String               @map("owner_id")
+  regionId               String               @map("region_id")
+  districtId             String               @map("district_id")
+  neighborhoodId         String?              @map("neighborhood_id")
+  addressPrivate         String               @map("address_private")
+  addressPublic          String               @map("address_public")
+  latitudeApprox         Decimal?             @db.Decimal(9, 6) @map("latitude_approx")
+  longitudeApprox        Decimal?             @db.Decimal(9, 6) @map("longitude_approx")
+  maxGuests              Int                  @map("max_guests")
+  bedroomCount           Int                  @map("bedroom_count")
+  bathroomCount          Int                  @map("bathroom_count")
+  bedCount               Int                  @map("bed_count")
+  hasPrivatePool         Boolean              @default(false) @map("has_private_pool")
+  hasHeatedPool          Boolean              @default(false) @map("has_heated_pool")
+  hasJacuzzi             Boolean              @default(false) @map("has_jacuzzi")
+  isShelteredPool        Boolean              @default(false) @map("is_sheltered_pool")
+  isConservativeFriendly Boolean              @default(false) @map("is_conservative_friendly")
+  isPetFriendly          Boolean              @default(false) @map("is_pet_friendly")
+  isChildFriendly        Boolean              @default(false) @map("is_child_friendly")
+  isFamilyFriendly       Boolean              @default(true) @map("is_family_friendly")
+  isLuxuryVilla          Boolean              @default(false) @map("is_luxury_villa")
+  isEconomicalVilla      Boolean              @default(false) @map("is_economical_villa")
+  isBungalowVilla        Boolean              @default(false) @map("is_bungalow_villa")
+  hasSeaView             Boolean              @default(false) @map("has_sea_view")
+  hasNatureView          Boolean              @default(false) @map("has_nature_view")
+  nearBeach              Boolean              @default(false) @map("near_beach")
+  nearCenter             Boolean              @default(false) @map("near_center")
+  hasBarbecue            Boolean              @default(false) @map("has_barbecue")
+  hasFireplace           Boolean              @default(false) @map("has_fireplace")
+  hasParking             Boolean              @default(false) @map("has_parking")
+  hasAirConditioning     Boolean              @default(false) @map("has_air_conditioning")
+  hasInternet            Boolean              @default(false) @map("has_internet")
+  isWheelchairFriendly   Boolean              @default(false) @map("is_wheelchair_friendly")
+  minNights              Int                  @default(2) @map("min_nights")
+  checkInTime            String               @map("check_in_time")
+  checkOutTime           String               @map("check_out_time")
+  basePrice              Decimal              @db.Decimal(10, 2) @map("base_price")
+  cleaningFee            Decimal              @db.Decimal(10, 2) @default(0) @map("cleaning_fee")
+  depositAmount          Decimal              @db.Decimal(10, 2) @default(0) @map("deposit_amount")
+  serviceFeeType         ServiceFeeType       @default(FIXED) @map("service_fee_type")
+  serviceFeeValue        Decimal              @db.Decimal(10, 2) @default(0) @map("service_fee_value")
+  extraGuestFee          Decimal              @db.Decimal(10, 2) @default(0) @map("extra_guest_fee")
+  cancellationPolicyId   String?              @map("cancellation_policy_id")
+  depositPolicyId        String?              @map("deposit_policy_id")
+  verificationStatus     VerificationStatus   @default(PENDING) @map("verification_status")
+  summaryFacts           Json?                @map("summary_facts")
+  houseRules             Json?
+  poolDetails            Json?                @map("pool_details")
+  nearbyPlaces           Json?                @map("nearby_places")
+  publishedAt            DateTime?            @map("published_at")
+  createdAt              DateTime             @default(now()) @map("created_at")
+  updatedAt              DateTime             @updatedAt @map("updated_at")
+  owner                  Owner                @relation(fields: [ownerId], references: [id], onDelete: Restrict)
+  region                 Region               @relation(fields: [regionId], references: [id], onDelete: Restrict)
+  district               District             @relation(fields: [districtId], references: [id], onDelete: Restrict)
+  neighborhood           Neighborhood?        @relation(fields: [neighborhoodId], references: [id], onDelete: SetNull)
+  cancellationPolicy     CancellationPolicy?  @relation(fields: [cancellationPolicyId], references: [id], onDelete: SetNull)
+  depositPolicy          DepositPolicy?       @relation(fields: [depositPolicyId], references: [id], onDelete: SetNull)
+  location               VillaLocation?
+  media                  VillaMedia[]
+  documents              VillaDocument[]
+  verification           VillaVerification?
+  rooms                  VillaRoom[]
+  amenities              VillaAmenity[]
+  concepts               VillaConcept[]
+  seasonPrices           SeasonPrice[]
+  priceRules             VillaPriceRule[]
+  availabilityBlocks     AvailabilityBlock[]
+  bookings               Booking[]
+  inquiries              Inquiry[]
+  reviews                Review[]
+  favorites              Favorite[]
+  comparisons            Comparison[]
+
+  @@index([status, regionId])
+  @@index([verificationStatus])
+  @@map("villas")
+}
+
+model VillaLocation {
+  id                String   @id @default(cuid())
+  villaId           String   @unique @map("villa_id")
+  mapLabel          String?  @map("map_label")
+  drivingDirections String?  @map("driving_directions")
+  distanceToBeachKm Decimal? @db.Decimal(5, 2) @map("distance_to_beach_km")
+  distanceToCenterKm Decimal? @db.Decimal(5, 2) @map("distance_to_center_km")
+  neighborhoodNotes String?  @map("neighborhood_notes")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+  villa             Villa    @relation(fields: [villaId], references: [id], onDelete: Cascade)
+
+  @@map("villa_locations")
+}
+
+model VillaMedia {
+  id         String       @id @default(cuid())
+  villaId    String       @map("villa_id")
+  fileId     String       @map("file_id")
+  mediaType  String       @default("image") @map("media_type")
+  altText    String?      @map("alt_text")
+  sortOrder  Int          @default(0) @map("sort_order")
+  isCover    Boolean      @default(false) @map("is_cover")
+  createdAt  DateTime     @default(now()) @map("created_at")
+  villa      Villa        @relation(fields: [villaId], references: [id], onDelete: Cascade)
+  file       UploadedFile @relation(fields: [fileId], references: [id], onDelete: Cascade)
+
+  @@index([villaId, sortOrder])
+  @@index([villaId, isCover])
+  @@map("villa_media")
+}
+
+model VillaDocument {
+  id                String       @id @default(cuid())
+  villaId           String       @map("villa_id")
+  fileId            String       @map("file_id")
+  documentType      String       @map("document_type")
+  note              String?
+  isVerified        Boolean      @default(false) @map("is_verified")
+  verifiedAt        DateTime?    @map("verified_at")
+  verifiedByAdminId String?      @map("verified_by_admin_id")
+  createdAt         DateTime     @default(now()) @map("created_at")
+  villa             Villa        @relation(fields: [villaId], references: [id], onDelete: Cascade)
+  file              UploadedFile @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  verifiedByAdmin   User?        @relation("VillaDocumentVerifier", fields: [verifiedByAdminId], references: [id], onDelete: SetNull)
+
+  @@index([villaId, documentType])
+  @@index([isVerified, createdAt])
+  @@map("villa_documents")
+}
+
+model VillaVerification {
+  id                         String             @id @default(cuid())
+  villaId                    String             @unique @map("villa_id")
+  identityVerified           Boolean            @default(false) @map("identity_verified")
+  ownershipOrAuthorityVerified Boolean          @default(false) @map("ownership_or_authority_verified")
+  tourismPermitVerified      Boolean            @default(false) @map("tourism_permit_verified")
+  locationVerified           Boolean            @default(false) @map("location_verified")
+  photosVerified             Boolean            @default(false) @map("photos_verified")
+  phoneVerified              Boolean            @default(false) @map("phone_verified")
+  lastVerifiedAt             DateTime?          @map("last_verified_at")
+  verifiedByAdminId          String?            @map("verified_by_admin_id")
+  verificationNotes          String?            @map("verification_notes")
+  createdAt                  DateTime           @default(now()) @map("created_at")
+  updatedAt                  DateTime           @updatedAt @map("updated_at")
+  villa                      Villa              @relation(fields: [villaId], references: [id], onDelete: Cascade)
+  verifiedByAdmin            User?              @relation("VillaVerificationAdmin", fields: [verifiedByAdminId], references: [id], onDelete: SetNull)
+
+  @@map("villa_verification")
+}
+
+model VillaRoom {
+  id          String     @id @default(cuid())
+  villaId     String     @map("villa_id")
+  name        String
+  roomType    String     @map("room_type")
+  floorLabel  String?    @map("floor_label")
+  description String?
+  sortOrder   Int        @default(0) @map("sort_order")
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
+  villa       Villa      @relation(fields: [villaId], references: [id], onDelete: Cascade)
+  beds        VillaBed[]
+
+  @@map("villa_rooms")
+}
+
+model VillaBed {
+  id        String    @id @default(cuid())
+  roomId    String    @map("room_id")
+  bedType   String    @map("bed_type")
+  quantity  Int       @default(1)
+  sleeps    Int       @default(1)
+  notes     String?
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  room      VillaRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  @@map("villa_beds")
+}
+
+model VillaAmenity {
+  villaId    String   @map("villa_id")
+  amenityId  String   @map("amenity_id")
+  createdAt  DateTime @default(now()) @map("created_at")
+  villa      Villa    @relation(fields: [villaId], references: [id], onDelete: Cascade)
+  amenity    Amenity  @relation(fields: [amenityId], references: [id], onDelete: Cascade)
+
+  @@id([villaId, amenityId])
+  @@map("villa_amenities")
+}
+
+model VillaConcept {
+  villaId    String   @map("villa_id")
+  conceptId  String   @map("concept_id")
+  createdAt  DateTime @default(now()) @map("created_at")
+  villa      Villa    @relation(fields: [villaId], references: [id], onDelete: Cascade)
+  concept    Concept  @relation(fields: [conceptId], references: [id], onDelete: Cascade)
+
+  @@id([villaId, conceptId])
+  @@map("villa_concepts")
+}
+
+model SeasonPrice {
+  id                 String   @id @default(cuid())
+  villaId            String   @map("villa_id")
+  name               String
+  startDate          DateTime @map("start_date") @db.Date
+  endDate            DateTime @map("end_date") @db.Date
+  nightlyPrice       Decimal  @db.Decimal(10, 2) @map("nightly_price")
+  minNightsOverride  Int?     @map("min_nights_override")
+  cleaningFeeOverride Decimal? @db.Decimal(10, 2) @map("cleaning_fee_override")
+  depositOverride    Decimal? @db.Decimal(10, 2) @map("deposit_override")
+  serviceFeeOverride Decimal? @db.Decimal(10, 2) @map("service_fee_override")
+  extraGuestFeeOverride Decimal? @db.Decimal(10, 2) @map("extra_guest_fee_override")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+  villa              Villa    @relation(fields: [villaId], references: [id], onDelete: Cascade)
+
+  @@index([villaId, startDate, endDate])
+  @@map("season_prices")
+}
+
+model VillaPriceRule {
+  id          String          @id @default(cuid())
+  villaId     String          @map("villa_id")
+  name        String
+  ruleType    PricingRuleType @map("rule_type")
+  value       Decimal         @db.Decimal(10, 2)
+  minStay     Int?            @map("min_stay")
+  maxGuests   Int?            @map("max_guests")
+  description String?
+  isActive    Boolean         @default(true) @map("is_active")
+  createdAt   DateTime        @default(now()) @map("created_at")
+  updatedAt   DateTime        @updatedAt @map("updated_at")
+  villa       Villa           @relation(fields: [villaId], references: [id], onDelete: Cascade)
+
+  @@map("villa_price_rules")
+}
+
+model Inquiry {
+  id                                   String        @id @default(cuid())
+  villaId                              String        @map("villa_id")
+  bookingId                            String?       @unique @map("booking_id")
+  userId                               String?       @map("user_id")
+  status                               InquiryStatus @default(NEW)
+  startDate                            DateTime?     @db.Date @map("start_date")
+  endDate                              DateTime?     @db.Date @map("end_date")
+  nights                               Int?
+  guestCount                           Int           @map("guest_count")
+  adults                               Int           @default(1)
+  children                             Int           @default(0)
+  infants                              Int           @default(0)
+  fullName                             String        @map("full_name")
+  email                                String
+  phone                                String
+  message                              String?
+  depositWarningAcknowledged           Boolean       @default(false) @map("deposit_warning_acknowledged")
+  offPlatformPaymentWarningAcknowledged Boolean      @default(false) @map("off_platform_payment_warning_acknowledged")
+  estimatedTotal                       Decimal?      @db.Decimal(10, 2) @map("estimated_total")
+  pricingSnapshot                      Json?         @map("pricing_snapshot")
+  createdAt                            DateTime      @default(now()) @map("created_at")
+  updatedAt                            DateTime      @updatedAt @map("updated_at")
+  villa                                Villa         @relation(fields: [villaId], references: [id], onDelete: Cascade)
+  booking                              Booking?
+  user                                 User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  messages                             BookingMessage[]
+  availabilityBlocks                   AvailabilityBlock[]
+
+  @@index([status, createdAt])
+  @@map("inquiries")
+}
+
+model Booking {
+  id                     String               @id @default(cuid())
+  villaId                String               @map("villa_id")
+  inquiryId              String?              @unique @map("inquiry_id")
+  userId                 String?              @map("user_id")
+  status                 BookingStatus        @default(PENDING)
+  startDate              DateTime             @db.Date @map("start_date")
+  endDate                DateTime             @db.Date @map("end_date")
+  guestCount             Int                  @map("guest_count")
+  adults                 Int                  @default(1)
+  children               Int                  @default(0)
+  infants                Int                  @default(0)
+  petCount               Int                  @default(0) @map("pet_count")
+  totalAmount            Decimal              @db.Decimal(10, 2) @map("total_amount")
+  currency               String               @default("TRY")
+  depositAmount          Decimal              @db.Decimal(10, 2) @map("deposit_amount")
+  serviceFee             Decimal              @db.Decimal(10, 2) @map("service_fee")
+  cleaningFee            Decimal              @db.Decimal(10, 2) @map("cleaning_fee")
+  extraGuestFee          Decimal              @db.Decimal(10, 2) @map("extra_guest_fee")
+  cancellationPolicyText String               @map("cancellation_policy_text")
+  depositPolicyText      String               @map("deposit_policy_text")
+  guestFullName          String               @map("guest_full_name")
+  guestEmail             String               @map("guest_email")
+  guestPhone             String               @map("guest_phone")
+  notes                  String?
+  reservedUntil          DateTime?            @map("reserved_until")
+  createdAt              DateTime             @default(now()) @map("created_at")
+  updatedAt              DateTime             @updatedAt @map("updated_at")
+  villa                  Villa                @relation(fields: [villaId], references: [id], onDelete: Cascade)
+  inquiry                Inquiry?             @relation(fields: [inquiryId], references: [id], onDelete: SetNull)
+  user                   User?                @relation(fields: [userId], references: [id], onDelete: SetNull)
+  guests                 BookingGuest[]
+  priceSnapshot          BookingPriceSnapshot?
+  messages               BookingMessage[]
+  availabilityBlocks     AvailabilityBlock[]
+  review                 Review?
+
+  @@index([status, startDate, endDate])
+  @@map("bookings")
+}
+
+model BookingGuest {
+  id        String   @id @default(cuid())
+  bookingId String   @map("booking_id")
+  fullName  String   @map("full_name")
+  ageGroup  String   @map("age_group")
+  age       Int?
+  createdAt DateTime @default(now()) @map("created_at")
+  booking   Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@map("booking_guests")
+}
+
+model BookingPriceSnapshot {
+  id               String   @id @default(cuid())
+  bookingId        String   @unique @map("booking_id")
+  basePriceTotal   Decimal  @db.Decimal(10, 2) @map("base_price_total")
+  nightlySubtotal  Decimal  @db.Decimal(10, 2) @map("nightly_subtotal")
+  cleaningFee      Decimal  @db.Decimal(10, 2) @map("cleaning_fee")
+  depositAmount    Decimal  @db.Decimal(10, 2) @map("deposit_amount")
+  serviceFee       Decimal  @db.Decimal(10, 2) @map("service_fee")
+  extraGuestFee    Decimal  @db.Decimal(10, 2) @map("extra_guest_fee")
+  totalAmount      Decimal  @db.Decimal(10, 2) @map("total_amount")
+  currency         String   @default("TRY")
+  pricingBreakdown Json     @map("pricing_breakdown")
+  createdAt        DateTime @default(now()) @map("created_at")
+  booking          Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@map("booking_price_snapshots")
+}
+
+model BookingMessage {
+  id         String            @id @default(cuid())
+  bookingId  String?           @map("booking_id")
+  inquiryId  String?           @map("inquiry_id")
+  senderType MessageSenderType @map("sender_type")
+  senderName String            @map("sender_name")
+  message    String
+  createdAt  DateTime          @default(now()) @map("created_at")
+  booking    Booking?          @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  inquiry    Inquiry?          @relation(fields: [inquiryId], references: [id], onDelete: Cascade)
+
+  @@map("booking_messages")
+}
+
+model AvailabilityBlock {
+  id               String                @id @default(cuid())
+  villaId          String                @map("villa_id")
+  bookingId        String?               @map("booking_id")
+  inquiryId        String?               @map("inquiry_id")
+  type             AvailabilityBlockType
+  reason           String?
+  startDate        DateTime              @db.Date @map("start_date")
+  endDate          DateTime              @db.Date @map("end_date")
+  createdByAdminId String?               @map("created_by_admin_id")
+  createdAt        DateTime              @default(now()) @map("created_at")
+  villa            Villa                 @relation(fields: [villaId], references: [id], onDelete: Cascade)
+  booking          Booking?              @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+  inquiry          Inquiry?              @relation(fields: [inquiryId], references: [id], onDelete: SetNull)
+  createdByAdmin   User?                 @relation("AvailabilityCreatedByAdmin", fields: [createdByAdminId], references: [id], onDelete: SetNull)
+
+  @@index([villaId, startDate, endDate])
+  @@map("availability_blocks")
+}
+
+model Review {
+  id          String       @id @default(cuid())
+  villaId     String       @map("villa_id")
+  bookingId   String?      @unique @map("booking_id")
+  userId      String?      @map("user_id")
+  authorName  String       @map("author_name")
+  rating      Int
+  title       String?
+  body        String
+  status      ReviewStatus @default(PENDING)
+  stayDate    DateTime?    @db.Date @map("stay_date")
+  publishedAt DateTime?    @map("published_at")
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime     @updatedAt @map("updated_at")
+  villa       Villa        @relation(fields: [villaId], references: [id], onDelete: Cascade)
+  booking     Booking?     @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+  user        User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+  replies     ReviewReply[]
+
+  @@index([villaId, status])
+  @@map("reviews")
+}
+
+model ReviewReply {
+  id           String          @id @default(cuid())
+  reviewId      String         @map("review_id")
+  responderType ReplyAuthorType @map("responder_type")
+  body         String
+  createdAt    DateTime        @default(now()) @map("created_at")
+  updatedAt    DateTime        @updatedAt @map("updated_at")
+  review       Review          @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  @@map("review_replies")
+}
+
+model Favorite {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  villaId    String  @map("villa_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  villa     Villa    @relation(fields: [villaId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, villaId])
+  @@map("favorites")
+}
+
+model Comparison {
+  id         String   @id @default(cuid())
+  userId     String?  @map("user_id")
+  sessionKey String?  @map("session_key")
+  villaId    String   @map("villa_id")
+  createdAt  DateTime @default(now()) @map("created_at")
+  user       User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  villa      Villa    @relation(fields: [villaId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, villaId])
+  @@unique([sessionKey, villaId])
+  @@map("comparisons")
+}
+
+model BlogPost {
+  id              String         @id @default(cuid())
+  authorId        String?        @map("author_id")
+  coverFileId     String?        @map("cover_file_id")
+  ogImageFileId   String?        @map("og_image_file_id")
+  title           String
+  slug            String         @unique
+  excerpt         String
+  content         String
+  status          BlogPostStatus @default(DRAFT)
+  seoTitle        String?        @map("seo_title")
+  seoDescription  String?        @map("seo_description")
+  publishedAt     DateTime?      @map("published_at")
+  createdAt       DateTime       @default(now()) @map("created_at")
+  updatedAt       DateTime       @updatedAt @map("updated_at")
+  author          User?          @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  coverFile       UploadedFile?  @relation("BlogCoverImage", fields: [coverFileId], references: [id], onDelete: SetNull)
+  ogImageFile     UploadedFile?  @relation("BlogOgImage", fields: [ogImageFileId], references: [id], onDelete: SetNull)
+
+  @@index([status, publishedAt])
+  @@map("blog_posts")
+}
+
+model SeoPage {
+  id             String      @id @default(cuid())
+  slug           String      @unique
+  pageType       SeoPageType @map("page_type")
+  title          String
+  description    String
+  h1             String?
+  intro          String?
+  body           String?
+  faqs           Json?
+  canonicalPath  String?     @map("canonical_path")
+  targetEntityId String?     @map("target_entity_id")
+  noIndex        Boolean     @default(false) @map("no_index")
+  ogTitle        String?     @map("og_title")
+  ogDescription  String?     @map("og_description")
+  createdAt      DateTime    @default(now()) @map("created_at")
+  updatedAt      DateTime    @updatedAt @map("updated_at")
+
+  @@map("seo_pages")
+}
+
+model Redirect {
+  id        String       @id @default(cuid())
+  fromPath  String       @unique @map("from_path")
+  toPath    String       @map("to_path")
+  type      RedirectType @default(PERMANENT)
+  isActive  Boolean      @default(true) @map("is_active")
+  createdAt DateTime     @default(now()) @map("created_at")
+  updatedAt DateTime     @updatedAt @map("updated_at")
+
+  @@index([isActive, updatedAt])
+  @@map("redirects")
+}
+
+model Setting {
+  id               String   @id @default(cuid())
+  key              String   @unique
+  groupName        String   @map("group_name")
+  valueJson        Json     @map("value_json")
+  description      String?
+  updatedByAdminId String?  @map("updated_by_admin_id")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+  updatedByAdmin   User?    @relation("SettingUpdatedBy", fields: [updatedByAdminId], references: [id], onDelete: SetNull)
+
+  @@index([groupName, key])
+  @@map("settings")
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  actorUserId String?  @map("actor_user_id")
+  action      String
+  entityType  String   @map("entity_type")
+  entityId    String   @map("entity_id")
+  message     String
+  metadata    Json?
+  ipAddress   String?  @map("ip_address")
+  userAgent   String?  @map("user_agent")
+  createdAt   DateTime @default(now()) @map("created_at")
+  actorUser   User?    @relation("AuditActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([entityType, entityId, createdAt])
+  @@map("audit_logs")
+}
