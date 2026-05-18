@@ -1,3 +1,4 @@
+import type { Route } from "next";
 import Link from "next/link";
 import { ArrowRight, Mail, PhoneCall } from "lucide-react";
 
@@ -88,7 +89,7 @@ export function SiteFooter() {
                   </div>
                 </div>
                 <Link
-                  href="/iletisim#listeleme"
+                  href={"/ev-sahibi/kayit" as Route}
                   className={buttonVariants({
                     variant: "accent",
                     className: "rounded-full",

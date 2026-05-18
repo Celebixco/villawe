@@ -1,5 +1,5 @@
 import { createHash, randomUUID } from "crypto";
-import { mkdir, rm, writeFile } from "fs/promises";
+import { mkdir, readFile, rm, writeFile } from "fs/promises";
 import path from "path";
 
 import {
@@ -65,5 +65,39 @@ export class LocalStorageService implements StorageService {
       storageKey,
     );
     await rm(destination, { force: true });
+  }
+
+  async readFile(storageKey: string) {
+    if (!isLocalStorageConfigured()) {
+      throw new Error(
+        getStorageConfigurationError() ||
+          "Local storage yalnızca development ortamında açık ve yapılandırılmış olabilir.",
+      );
+    }
+
+    const uploadDir = env.LOCAL_UPLOAD_DIR as string;
+    const destination = path.join(
+      /* turbopackIgnore: true */ process.cwd(),
+      uploadDir,
+      storageKey,
+    );
+    const buffer = await readFile(destination);
+    const extension = path.extname(storageKey).toLowerCase();
+    const contentType =
+      extension === ".pdf"
+        ? "application/pdf"
+        : extension === ".png"
+          ? "image/png"
+          : extension === ".webp"
+            ? "image/webp"
+            : extension === ".avif"
+              ? "image/avif"
+              : "image/jpeg";
+
+    return {
+      buffer,
+      contentType,
+      sizeBytes: buffer.byteLength,
+    };
   }
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import type { Route } from "next";
 import Link from "next/link";
 import { Heart, Menu, Sparkles } from "lucide-react";
 import { usePathname } from "next/navigation";
@@ -70,16 +71,16 @@ export function SiteHeader() {
             <Heart className="size-4" />
           </Link>
           <Link
-            href="/admin/login"
+            href={"/ev-sahibi/giris" as Route}
             className={buttonVariants({
               variant: "outline",
               className: "rounded-full",
             })}
           >
-            Admin Girişi
+            Ev Sahibi Girişi
           </Link>
           <Link
-            href="/iletisim#listeleme"
+            href={"/ev-sahibi/kayit" as Route}
             className={buttonVariants({
               variant: "accent",
               className: "rounded-full px-6",
@@ -155,7 +156,7 @@ export function SiteHeader() {
                   Favoriler
                 </Link>
                 <Link
-                  href="/iletisim#listeleme"
+                  href={"/ev-sahibi/kayit" as Route}
                   className={buttonVariants({
                     variant: "accent",
                     className: "w-full rounded-full",
@@ -164,13 +165,13 @@ export function SiteHeader() {
                   Villanızı Listeleyin
                 </Link>
                 <Link
-                  href="/admin/login"
+                  href={"/ev-sahibi/giris" as Route}
                   className={buttonVariants({
                     variant: "outline",
                     className: "w-full rounded-full",
                   })}
                 >
-                  Admin Girişi
+                  Ev Sahibi Girişi
                 </Link>
               </div>
             </nav>
