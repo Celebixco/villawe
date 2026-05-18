@@ -63,6 +63,8 @@ DEMO_MODE=false
 - Villawe uygulaması yalnızca PostgreSQL bağlantısını tüketir.
 - Prisma runtime bağlantısı `DATABASE_URL` ile kurulur.
 - Prisma migration/deploy akışı gerekirse `DIRECT_URL` ile ayrıştırılabilir.
+- Örnek bağlantı deseni: `postgresql://postgres:<password>@supabase-db:5432/villawe?schema=public`
+- Production’da demo fallback devre dışıdır; `DATABASE_URL` hatalıysa public sayfalar güvenli bakım durumu gösterir, admin ekranları kontrollü yapılandırma/veritabanı hatası döner.
 
 ## Redis Notes
 
@@ -80,6 +82,7 @@ Redis erişilemezse uygulama çalışmaya devam eder; cache ve rate limiting gü
 - R2, villa görselleri ve dokümanları için tek kaynak doğrusu olmaya devam eder.
 - R2 access key bilgileri hiçbir client component’e gönderilmez.
 - Admin upload akışı yalnızca server-side yetkili işlemler üzerinden çalışır.
+- Local storage yalnızca development ortamında `STORAGE_DRIVER=local` ve `LOCAL_UPLOAD_DIR` açıkça tanımlandığında kullanılabilir.
 
 ## Pre-Deploy Checklist
 

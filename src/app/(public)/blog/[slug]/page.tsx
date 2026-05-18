@@ -41,8 +41,8 @@ export async function generateMetadata({
   }
 
   return buildMetadata({
-    title: `${post.title} | Villawe`,
-    description: post.excerpt,
+    title: post.seoTitle || `${post.title} | Villawe`,
+    description: post.seoDescription || post.excerpt,
     path: `/blog/${post.slug}`,
     image: post.coverImage,
   });

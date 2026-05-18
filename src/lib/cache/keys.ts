@@ -38,6 +38,7 @@ export const searchCacheKeys = {
 export const seoCacheKeys = {
   landingTargets: () => buildCacheKey("seo", "targets"),
   landingPage: (slug: string) => buildCacheKey("seo", "landing-page", slug),
+  page: (slug: string) => buildCacheKey("seo", "page", slug),
   sitemap: () => buildCacheKey("seo", "sitemap"),
 };
 

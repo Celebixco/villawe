@@ -1,4 +1,4 @@
-import { getRedisConnection } from "@/lib/redis/client";
+import { getRedisConnection, reportRedisDegradation } from "@/lib/redis/client";
 
 type CacheEnvelope<T> = {
   value: T;
@@ -16,14 +16,25 @@ export async function withRedisJsonCache<T>(
     return loader();
   }
 
-  const cached = await redis.get(key);
+  let cached: string | null = null;
+
+  try {
+    cached = await redis.get(key);
+  } catch (error) {
+    reportRedisDegradation(error, "cache-read");
+    return loader();
+  }
 
   if (cached) {
     try {
       const parsed = JSON.parse(cached) as CacheEnvelope<T>;
       return parsed.value;
     } catch {
-      await redis.del(key);
+      try {
+        await redis.del(key);
+      } catch (error) {
+        reportRedisDegradation(error, "cache-delete-corrupt");
+      }
     }
   }
 
@@ -33,9 +44,13 @@ export async function withRedisJsonCache<T>(
     cachedAt: new Date().toISOString(),
   };
 
-  await redis.set(key, JSON.stringify(envelope), {
-    EX: ttlSeconds,
-  });
+  try {
+    await redis.set(key, JSON.stringify(envelope), {
+      EX: ttlSeconds,
+    });
+  } catch (error) {
+    reportRedisDegradation(error, "cache-write");
+  }
 
   return value;
 }
@@ -50,20 +65,24 @@ export async function invalidateRedisByPrefixes(prefixes: string[]) {
   let deleted = 0;
 
   for (const prefix of prefixes) {
-    const keys: string[] = [];
+    try {
+      const keys: string[] = [];
 
-    for await (const key of redis.scanIterator({
-      MATCH: `${prefix}*`,
-      COUNT: 100,
-    })) {
-      keys.push(String(key));
+      for await (const key of redis.scanIterator({
+        MATCH: `${prefix}*`,
+        COUNT: 100,
+      })) {
+        keys.push(String(key));
+      }
+
+      if (!keys.length) {
+        continue;
+      }
+
+      deleted += await redis.unlink(keys);
+    } catch (error) {
+      reportRedisDegradation(error, "cache-invalidate");
     }
-
-    if (!keys.length) {
-      continue;
-    }
-
-    deleted += await redis.unlink(keys);
   }
 
   return deleted;

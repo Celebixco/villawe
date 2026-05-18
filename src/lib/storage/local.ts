@@ -2,7 +2,11 @@ import { createHash, randomUUID } from "crypto";
 import { mkdir, rm, writeFile } from "fs/promises";
 import path from "path";
 
-import { env, isLocalStorageAllowed } from "@/lib/env";
+import {
+  env,
+  getStorageConfigurationError,
+  isLocalStorageConfigured,
+} from "@/lib/env";
 import type { SaveFileInput, StorageService } from "@/lib/storage/types";
 
 function sanitizeFileName(filename: string) {
@@ -11,11 +15,14 @@ function sanitizeFileName(filename: string) {
 
 export class LocalStorageService implements StorageService {
   async saveFile(input: SaveFileInput) {
-    if (!isLocalStorageAllowed()) {
-      throw new Error("Local storage yalnızca development ortamında kullanılabilir.");
+    if (!isLocalStorageConfigured()) {
+      throw new Error(
+        getStorageConfigurationError() ||
+          "Local storage yalnızca development ortamında açık ve yapılandırılmış olabilir.",
+      );
     }
 
-    const uploadDir = env.LOCAL_UPLOAD_DIR || "public/uploads";
+    const uploadDir = env.LOCAL_UPLOAD_DIR as string;
     const fileExt = path.extname(input.filename);
     const baseName = sanitizeFileName(path.basename(input.filename, fileExt));
     const fingerprint = createHash("sha1").update(input.buffer).digest("hex").slice(0, 12);
@@ -44,11 +51,14 @@ export class LocalStorageService implements StorageService {
   }
 
   async deleteFile(storageKey: string) {
-    if (!isLocalStorageAllowed()) {
-      throw new Error("Local storage yalnızca development ortamında kullanılabilir.");
+    if (!isLocalStorageConfigured()) {
+      throw new Error(
+        getStorageConfigurationError() ||
+          "Local storage yalnızca development ortamında açık ve yapılandırılmış olabilir.",
+      );
     }
 
-    const uploadDir = env.LOCAL_UPLOAD_DIR || "public/uploads";
+    const uploadDir = env.LOCAL_UPLOAD_DIR as string;
     const destination = path.join(
       /* turbopackIgnore: true */ process.cwd(),
       uploadDir,

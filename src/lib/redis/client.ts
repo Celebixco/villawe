@@ -7,6 +7,7 @@ type VillaweRedisClient = ReturnType<typeof createClient>;
 declare global {
   var __villaweRedisClient: VillaweRedisClient | undefined;
   var __villaweRedisConnectPromise: Promise<VillaweRedisClient | null> | undefined;
+  var __villaweRedisConfigWarningShown: boolean | undefined;
 }
 
 function isBuildPhase() {
@@ -19,7 +20,18 @@ function isBuildPhase() {
 export function getRedisClient() {
   const redisUrl = env.REDIS_URL;
 
-  if (!isRedisConfigured() || isBuildPhase() || !redisUrl) {
+  if (isBuildPhase()) {
+    return null;
+  }
+
+  if (!isRedisConfigured() || !redisUrl) {
+    if (isProduction() && !globalThis.__villaweRedisConfigWarningShown) {
+      globalThis.__villaweRedisConfigWarningShown = true;
+      console.error(
+        "[villawe:redis] REDIS_URL tanımlı değil. Cache ve rate limit güvenli biçimde devre dışı kalacak.",
+      );
+    }
+
     return null;
   }
 
@@ -40,6 +52,18 @@ export function getRedisClient() {
   return globalThis.__villaweRedisClient;
 }
 
+export function reportRedisDegradation(error: unknown, scope: string) {
+  const message =
+    error instanceof Error ? error.message.split("\n")[0] : "unknown redis error";
+
+  if (isProduction()) {
+    console.error(`[villawe:redis:${scope}] ${message}`);
+    return;
+  }
+
+  console.warn(`[villawe:redis:${scope}] ${message}`);
+}
+
 export async function getRedisConnection() {
   const client = getRedisClient();
 
@@ -56,9 +80,7 @@ export async function getRedisConnection() {
       .connect()
       .then(() => client)
       .catch((error) => {
-        if (!isProduction()) {
-          console.warn(`[villawe:redis] ${error.message}`);
-        }
+        reportRedisDegradation(error, "connect");
 
         return null;
       })

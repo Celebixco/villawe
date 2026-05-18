@@ -174,6 +174,8 @@ export type BlogPostRecord = {
   coverImage: string;
   content: string;
   publishedAt: string;
+  seoTitle?: string | undefined;
+  seoDescription?: string | undefined;
 };
 
 export type OwnerRecord = {
@@ -210,4 +212,21 @@ export type AuditLogRecord = {
 export type SeoLandingTarget =
   | { type: "region"; slug: string; entitySlug: string }
   | { type: "district"; slug: string; entitySlug: string }
-  | { type: "concept"; slug: string; entitySlug: string };
+  | { type: "concept"; slug: string; entitySlug: string }
+  | { type: "custom"; slug: string; entitySlug: string };
+
+export type SeoPageRuntimeRecord = {
+  id: string;
+  slug: string;
+  pageType: "REGION" | "CONCEPT" | "LANDING" | "BLOG" | "CUSTOM";
+  title: string;
+  description: string;
+  h1?: string | undefined;
+  intro?: string | undefined;
+  body?: string | undefined;
+  canonicalPath?: string | undefined;
+  noIndex: boolean;
+  ogTitle?: string | undefined;
+  ogDescription?: string | undefined;
+  targetEntityId?: string | undefined;
+};

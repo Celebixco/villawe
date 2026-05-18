@@ -9,6 +9,7 @@ import type {
   InquiryRecord,
   OwnerRecord,
   RegionRecord,
+  SeoPageRuntimeRecord,
   SeoLandingTarget,
   VillaDetail,
 } from "@/features/villas/types";
@@ -202,9 +203,19 @@ type PrismaAuditLogRecord = {
   metadata?: unknown;
 };
 type PrismaSeoPageRecord = {
+  id: string;
   slug: string;
   pageType: string;
+  title: string;
+  description: string;
+  h1?: string | null;
+  intro?: string | null;
+  body?: string | null;
+  canonicalPath?: string | null;
   targetEntityId?: string | null;
+  noIndex?: boolean;
+  ogTitle?: string | null;
+  ogDescription?: string | null;
 };
 
 function mapServiceFeeType(value: string): "none" | "fixed" | "percentage" | "included" {
@@ -486,6 +497,26 @@ function mapBlogPostFromPrisma(post: PrismaBlogPostRecord): BlogPostRecord {
     publishedAt:
       post.publishedAt?.toISOString().slice(0, 10) ||
       new Date().toISOString().slice(0, 10),
+    seoTitle: post.seoTitle || undefined,
+    seoDescription: post.seoDescription || undefined,
+  };
+}
+
+function mapSeoPageFromPrisma(page: PrismaSeoPageRecord): SeoPageRuntimeRecord {
+  return {
+    id: page.id,
+    slug: page.slug,
+    pageType: page.pageType as SeoPageRuntimeRecord["pageType"],
+    title: page.title,
+    description: page.description,
+    h1: page.h1 || undefined,
+    intro: page.intro || undefined,
+    body: page.body || undefined,
+    canonicalPath: page.canonicalPath || undefined,
+    noIndex: Boolean(page.noIndex),
+    ogTitle: page.ogTitle || undefined,
+    ogDescription: page.ogDescription || undefined,
+    targetEntityId: page.targetEntityId || undefined,
   };
 }
 
@@ -776,13 +807,29 @@ export async function getLandingTargetBySlug(slug: string) {
 
 export async function getLandingPageData(slug: string) {
   return withPublicReadCache(seoCacheKeys.landingPage(slug), 300, async () => {
-    const [target, villas, regions, concepts, districts] = await Promise.all([
+    const [target, seoPage, villas, regions, concepts, districts] = await Promise.all([
       getLandingTargetBySlug(slug),
+      getSeoPageBySlug(slug),
       getAllPublishedVillas(),
       getRegions(),
       getConcepts(),
       getDistricts(),
     ]);
+
+    if (!target && !seoPage) {
+      return null;
+    }
+
+    if (seoPage?.pageType === "CUSTOM") {
+      return {
+        target: null,
+        seoPage,
+        region: null,
+        concept: null,
+        district: null,
+        villas: [],
+      };
+    }
 
     if (!target) {
       return null;
@@ -792,6 +839,7 @@ export async function getLandingPageData(slug: string) {
       const region = regions.find((item) => item.slug === target.entitySlug);
       return {
         target,
+        seoPage,
         region: region || null,
         concept: null,
         district: null,
@@ -803,6 +851,7 @@ export async function getLandingPageData(slug: string) {
       const district = districts.find((item) => item.slug === target.entitySlug);
       return {
         target,
+        seoPage,
         region: district
           ? regions.find((region) => region.slug === district.regionSlug) || null
           : null,
@@ -816,6 +865,7 @@ export async function getLandingPageData(slug: string) {
 
     return {
       target,
+      seoPage,
       region: null,
       concept: concept || null,
       district: null,
@@ -898,6 +948,37 @@ export async function getBlogPostBySlug(slug: string) {
     const posts = await getBlogPosts();
     return posts.find((post) => post.slug === slug) || null;
   });
+}
+
+export async function getSeoPageBySlug(slug: string) {
+  return withPublicReadCache(seoCacheKeys.page(slug), 600, () =>
+    withDbFallback(
+      async (prisma) => {
+        const page = await prisma.seoPage.findUnique({
+          where: { slug },
+          select: {
+            id: true,
+            slug: true,
+            pageType: true,
+            title: true,
+            description: true,
+            h1: true,
+            intro: true,
+            body: true,
+            canonicalPath: true,
+            targetEntityId: true,
+            noIndex: true,
+            ogTitle: true,
+            ogDescription: true,
+          },
+        });
+
+        return page ? mapSeoPageFromPrisma(page as PrismaSeoPageRecord) : null;
+      },
+      null,
+      null,
+    ),
+  );
 }
 
 export const getOwners = cache(async (): Promise<OwnerRecord[]> => {
@@ -1060,10 +1141,25 @@ export const getSeoTargets = cache(async (): Promise<SeoLandingTarget[]> => {
           prisma.seoPage.findMany({
             where: {
               pageType: {
-                in: ["REGION", "CONCEPT", "LANDING"],
+                in: ["REGION", "CONCEPT", "LANDING", "CUSTOM"],
               },
+              noIndex: false,
             },
-            select: { slug: true, pageType: true, targetEntityId: true },
+            select: {
+              id: true,
+              slug: true,
+              pageType: true,
+              title: true,
+              description: true,
+              h1: true,
+              intro: true,
+              body: true,
+              canonicalPath: true,
+              targetEntityId: true,
+              noIndex: true,
+              ogTitle: true,
+              ogDescription: true,
+            },
           }),
         ]);
 
@@ -1090,6 +1186,14 @@ export const getSeoTargets = cache(async (): Promise<SeoLandingTarget[]> => {
         ];
 
         for (const page of seoPages as PrismaSeoPageRecord[]) {
+          if (page.pageType === "CUSTOM") {
+            derivedTargets.push({
+              type: "custom",
+              slug: page.slug,
+              entitySlug: page.slug,
+            });
+          }
+
           if (page.pageType === "REGION" && page.targetEntityId) {
             const regionSlug = regionById.get(page.targetEntityId);
 

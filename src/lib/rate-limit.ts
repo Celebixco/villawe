@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 
 import { buildCacheKey } from "@/lib/cache/keys";
 import { getRedisConnection } from "@/lib/redis/client";
+import { reportRedisDegradation } from "@/lib/redis/client";
 
 function hashValue(value: string) {
   return createHash("sha1").update(value).digest("hex");
@@ -36,15 +37,28 @@ export async function enforceRateLimit(input: {
     };
   }
 
-  const rateLimitKey = buildCacheKey("rate-limit", input.scope, input.key);
-  const currentCount = await redis.incr(rateLimitKey);
+  try {
+    const rateLimitKey = buildCacheKey("rate-limit", input.scope, input.key);
+    const currentCount = await redis.incr(rateLimitKey);
 
-  if (currentCount === 1) {
-    await redis.expire(rateLimitKey, input.windowSeconds);
-  }
+    if (currentCount === 1) {
+      await redis.expire(rateLimitKey, input.windowSeconds);
+    }
 
-  if (currentCount > input.limit) {
-    throw new Error(input.message);
+    if (currentCount > input.limit) {
+      throw new Error(input.message);
+    }
+  } catch (error) {
+    if (error instanceof Error && error.message === input.message) {
+      throw error;
+    }
+
+    reportRedisDegradation(error, `rate-limit:${input.scope}`);
+
+    return {
+      allowed: true,
+      enforced: false,
+    };
   }
 
   return {

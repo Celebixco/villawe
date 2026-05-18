@@ -32,6 +32,7 @@ Villawe artık demo veriyi sessizce production’a taşımaz.
 ```env
 DEMO_MODE="true"
 STORAGE_DRIVER="local"
+LOCAL_UPLOAD_DIR="public/uploads"
 ```
 
 Önerilen production ayarları:
@@ -116,7 +117,7 @@ npm run dev
 - `npm run db:seed`: Seed verisini yükler
 - `npm run db:studio`: Prisma Studio açar
 
-`prisma/seed.ts` mevcut sample veriyi temizleyip aynı development seed setini tekrar yükler. Bu yüzden tekrar çalıştırıldığında sonuç tutarlıdır. Seed villaları başlıklarında `[Seed]` etiketi taşır; production envanteri yerine development örneği oldukları açıkça görünür.
+`prisma/seed.ts` artık seed kayıtlarını idempotent şekilde upsert eder. Yeniden çalıştırıldığında tüm veritabanını silmez; yalnızca seed kapsamındaki demo/içerik kayıtlarını günceller ve eksik olanları ekler. Seed villaları başlıklarında `[Seed]` etiketi taşır; production envanteri yerine development örneği oldukları açıkça görünür.
 
 Prisma runtime bağlantısı uygulama içinde `DATABASE_URL` üzerinden kurulur. Eğer migration akışını ayrı bir bağlantı ile çalıştırmak isterseniz Prisma CLI için `DIRECT_URL` tanımlayabilirsiniz. Bu, self-hosted Supabase/Postgres üzerinde connection policy ayırmak istediğiniz kurulumlarda faydalıdır.
 
@@ -127,6 +128,8 @@ Veritabanı ayağa kalkmadan arayüzü incelemek isterseniz:
 ```env
 DEMO_MODE="true"
 DATABASE_URL=""
+STORAGE_DRIVER="local"
+LOCAL_UPLOAD_DIR="public/uploads"
 ```
 
 Bu modda:
@@ -138,7 +141,7 @@ Bu modda:
 
 ## Cloudflare R2 Kurulumu
 
-Development dışında local storage kullanmayın. Staging / production için R2 zorunludur.
+Development dışında local storage kullanmayın. Local upload yalnızca `STORAGE_DRIVER="local"` ve `LOCAL_UPLOAD_DIR` birlikte açıkça tanımlandığında dev ortamında çalışır. Staging / production için R2 zorunludur.
 
 1. Cloudflare R2 bucket oluşturun.
 2. S3 compatible API anahtarlarını alın.
@@ -194,9 +197,11 @@ Gerçek veritabanı seed’i ile admin kullanıcı şu env alanlarına göre olu
 ## Production Notları
 
 - Production build demo veriye dayanmaz.
+- `.env.example` içindeki `DEMO_MODE="false"` güvenli varsayılandır; demo mod yalnızca bilinçli olarak açılmalıdır.
 - `DATABASE_URL` yoksa veya çalışmıyorsa katalog boş/korumalı durum gösterir.
 - Self-hosted Supabase/Postgres bağlantısı uygulamada `DATABASE_URL` ile kullanılır.
 - `REDIS_URL` production’da tanımlanmalı; cache ve rate limiting Coolify Redis servisine bağlanır.
+- `REDIS_URL` yoksa veya Redis erişilemezse uygulama kontrollü şekilde degrade olur; katalog ve admin akışları cache/rate-limit olmadan devam eder.
 - Villa publish aksiyonu server-side doğrulama checklist’ine takılır.
 - Upload akışı server action üzerinden korunur.
 - Signed cookie `httpOnly`, production’da `secure`, issuer/audience doğrulamalı çalışır.

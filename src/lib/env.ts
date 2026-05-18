@@ -58,7 +58,7 @@ export const env = envSchema.parse({
   REDIS_URL: process.env.REDIS_URL,
   STORAGE_DRIVER:
     process.env.STORAGE_DRIVER ||
-    (process.env.R2_BUCKET_NAME || process.env.CLOUDFLARE_R2_BUCKET ? "r2" : "local"),
+    (process.env.R2_BUCKET_NAME || process.env.CLOUDFLARE_R2_BUCKET ? "r2" : undefined),
   R2_ACCOUNT_ID: process.env.R2_ACCOUNT_ID,
   R2_ENDPOINT: inferredR2Endpoint,
   R2_BUCKET_NAME: process.env.R2_BUCKET_NAME || process.env.CLOUDFLARE_R2_BUCKET,
@@ -131,6 +131,32 @@ export function isR2Configured() {
 
 export function isLocalStorageAllowed() {
   return env.STORAGE_DRIVER === "local" && !isProduction();
+}
+
+export function isLocalStorageConfigured() {
+  return Boolean(isLocalStorageAllowed() && env.LOCAL_UPLOAD_DIR);
+}
+
+export function getStorageConfigurationError() {
+  if (env.STORAGE_DRIVER === "r2" && !isR2Configured()) {
+    return "STORAGE_DRIVER=r2 seçildi ancak Cloudflare R2 ortam değişkenleri eksik.";
+  }
+
+  if (env.STORAGE_DRIVER === "local") {
+    if (isProduction()) {
+      return "Production ortamında local storage kullanılamaz. STORAGE_DRIVER=r2 yapılandırın.";
+    }
+
+    if (!env.LOCAL_UPLOAD_DIR) {
+      return "Development local upload akışı için LOCAL_UPLOAD_DIR açıkça tanımlanmalıdır.";
+    }
+  }
+
+  if (!env.STORAGE_DRIVER) {
+    return "STORAGE_DRIVER tanımlı değil. Development için local, staging/production için r2 seçin.";
+  }
+
+  return null;
 }
 
 export function getSessionSecret() {

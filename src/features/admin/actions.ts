@@ -1,6 +1,7 @@
 "use server";
 
 import { createHash } from "crypto";
+import path from "path";
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -50,8 +51,9 @@ const IMAGE_MIME_TYPES = new Set([
   "image/png",
   "image/webp",
   "image/avif",
-  "image/svg+xml",
 ]);
+
+const IMAGE_EXTENSIONS = new Set([".jpg", ".jpeg", ".png", ".webp", ".avif"]);
 
 const DOCUMENT_MIME_TYPES = new Set([
   "application/pdf",
@@ -59,6 +61,8 @@ const DOCUMENT_MIME_TYPES = new Set([
   "image/png",
   "image/webp",
 ]);
+
+const DOCUMENT_EXTENSIONS = new Set([".pdf", ".jpg", ".jpeg", ".png", ".webp"]);
 
 const ALLOWED_DOCUMENT_TYPES = new Set([
   "tourism_permit",
@@ -102,13 +106,15 @@ function assertDocumentTypeAllowed(value: string) {
 }
 
 function assertUploadFileAllowed(file: File, kind: "image" | "document") {
+  const extension = path.extname(file.name).toLowerCase();
+
   if (!file.size) {
     throw new Error("Boş dosya yüklenemez.");
   }
 
   if (kind === "image") {
-    if (!IMAGE_MIME_TYPES.has(file.type)) {
-      throw new Error("Yalnızca JPG, PNG, WebP, AVIF veya SVG görselleri yüklenebilir.");
+    if (!IMAGE_MIME_TYPES.has(file.type) || !IMAGE_EXTENSIONS.has(extension)) {
+      throw new Error("Yalnızca JPG, PNG, WebP veya AVIF görselleri yüklenebilir.");
     }
 
     if (file.size > MAX_IMAGE_BYTES) {
@@ -118,7 +124,7 @@ function assertUploadFileAllowed(file: File, kind: "image" | "document") {
     return;
   }
 
-  if (!DOCUMENT_MIME_TYPES.has(file.type)) {
+  if (!DOCUMENT_MIME_TYPES.has(file.type) || !DOCUMENT_EXTENSIONS.has(extension)) {
     throw new Error("Yalnızca PDF, JPG, PNG veya WebP dokümanları yüklenebilir.");
   }
 
@@ -151,6 +157,27 @@ async function createStoredFileRecord(input: {
     stored,
     checksum,
   };
+}
+
+async function applyUploadRateLimit(scope: string, identity: string) {
+  const rateLimitKey = await getRequestRateLimitKey(scope, identity);
+
+  await enforceRateLimit({
+    scope,
+    key: rateLimitKey,
+    limit: 20,
+    windowSeconds: 600,
+    message:
+      "Çok kısa sürede fazla dosya yükleme denemesi yapıldı. Lütfen birkaç dakika sonra tekrar deneyin.",
+  });
+}
+
+async function safeDeleteStoredFile(storageKey: string) {
+  try {
+    await getStorageService().deleteFile(storageKey);
+  } catch {
+    // Best-effort cleanup: DB integrity is preferred over failing the whole mutation.
+  }
 }
 
 async function createUploadedFileRecord(input: {
@@ -736,6 +763,12 @@ export async function uploadVillaAssetAction(formData: FormData) {
 
   try {
     const { session, prisma } = await requireAdminMutation();
+
+    await applyUploadRateLimit(
+      "admin-upload",
+      `${session.userId}:${villaId}:${assetType}:${file.name}`,
+    );
+
     const uploadedFile = await createUploadedFileRecord({
       prisma,
       sessionUserId: session.userId,
@@ -745,30 +778,38 @@ export async function uploadVillaAssetAction(formData: FormData) {
       altText: altText || undefined,
     });
 
-    if (assetType === "media") {
-      const currentMediaCount = await prisma.villaMedia.count({
-        where: { villaId },
-      });
+    try {
+      if (assetType === "media") {
+        const currentMediaCount = await prisma.villaMedia.count({
+          where: { villaId },
+        });
 
-      await prisma.villaMedia.create({
-        data: {
-          villaId,
-          fileId: uploadedFile.id,
-          mediaType: "image",
-          altText: altText || uploadedFile.originalName,
-          sortOrder: currentMediaCount,
-          isCover: currentMediaCount === 0,
-        },
+        await prisma.villaMedia.create({
+          data: {
+            villaId,
+            fileId: uploadedFile.id,
+            mediaType: "image",
+            altText: altText || uploadedFile.originalName,
+            sortOrder: currentMediaCount,
+            isCover: currentMediaCount === 0,
+          },
+        });
+      } else {
+        await prisma.villaDocument.create({
+          data: {
+            villaId,
+            fileId: uploadedFile.id,
+            documentType,
+            note: note || null,
+          },
+        });
+      }
+    } catch (error) {
+      await prisma.uploadedFile.deleteMany({
+        where: { id: uploadedFile.id },
       });
-    } else {
-      await prisma.villaDocument.create({
-        data: {
-          villaId,
-          fileId: uploadedFile.id,
-          documentType,
-          note: note || null,
-        },
-      });
+      await safeDeleteStoredFile(uploadedFile.storageKey);
+      throw error;
     }
 
     await writeAuditLog({
@@ -898,12 +939,12 @@ export async function deleteVillaMediaAction(formData: FormData) {
       throw new Error("Silinecek medya bulunamadı.");
     }
 
-    await getStorageService().deleteFile(media.file.storageKey);
-
     await prisma.$transaction([
       prisma.villaMedia.delete({ where: { id: parsed.data.mediaId } }),
       prisma.uploadedFile.delete({ where: { id: media.fileId } }),
     ]);
+
+    await safeDeleteStoredFile(media.file.storageKey);
 
     await writeAuditLog({
       actorUserId: session.userId,
@@ -987,12 +1028,12 @@ export async function deleteVillaDocumentAction(formData: FormData) {
       throw new Error("Silinecek doküman bulunamadı.");
     }
 
-    await getStorageService().deleteFile(document.file.storageKey);
-
     await prisma.$transaction([
       prisma.villaDocument.delete({ where: { id: documentId } }),
       prisma.uploadedFile.delete({ where: { id: document.fileId } }),
     ]);
+
+    await safeDeleteStoredFile(document.file.storageKey);
 
     await writeAuditLog({
       actorUserId: session.userId,
@@ -1026,6 +1067,12 @@ export async function uploadOwnerDocumentAction(formData: FormData) {
 
   try {
     const { session, prisma } = await requireAdminMutation();
+
+    await applyUploadRateLimit(
+      "admin-upload",
+      `${session.userId}:${ownerId}:owner-document:${file.name}`,
+    );
+
     const uploadedFile = await createUploadedFileRecord({
       prisma,
       sessionUserId: session.userId,
@@ -1034,14 +1081,22 @@ export async function uploadOwnerDocumentAction(formData: FormData) {
       target: "owner-document",
     });
 
-    await prisma.ownerDocument.create({
-      data: {
-        ownerId,
-        fileId: uploadedFile.id,
-        documentType,
-        note: note || null,
-      },
-    });
+    try {
+      await prisma.ownerDocument.create({
+        data: {
+          ownerId,
+          fileId: uploadedFile.id,
+          documentType,
+          note: note || null,
+        },
+      });
+    } catch (error) {
+      await prisma.uploadedFile.deleteMany({
+        where: { id: uploadedFile.id },
+      });
+      await safeDeleteStoredFile(uploadedFile.storageKey);
+      throw error;
+    }
 
     await writeAuditLog({
       actorUserId: session.userId,
@@ -1125,12 +1180,12 @@ export async function deleteOwnerDocumentAction(formData: FormData) {
       throw new Error("Silinecek doküman bulunamadı.");
     }
 
-    await getStorageService().deleteFile(document.file.storageKey);
-
     await prisma.$transaction([
       prisma.ownerDocument.delete({ where: { id: documentId } }),
       prisma.uploadedFile.delete({ where: { id: document.fileId } }),
     ]);
+
+    await safeDeleteStoredFile(document.file.storageKey);
 
     await writeAuditLog({
       actorUserId: session.userId,
