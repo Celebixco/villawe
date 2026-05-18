@@ -13,6 +13,11 @@ type VillaCardProps = {
 };
 
 export function VillaCard({ villa }: VillaCardProps) {
+  const isFullyVerified =
+    villa.verification.identityVerified &&
+    villa.verification.ownershipOrAuthorityVerified &&
+    villa.verification.tourismPermitVerified;
+
   return (
     <Card className="villawe-panel overflow-hidden transition duration-300 hover:-translate-y-1 hover:border-primary/18 hover:shadow-[0_28px_70px_-36px_rgba(18,110,130,0.3)]">
       <div className="relative aspect-[4/3] overflow-hidden">
@@ -25,10 +30,12 @@ export function VillaCard({ villa }: VillaCardProps) {
         />
         <div className="absolute inset-x-0 bottom-0 h-36 bg-gradient-to-t from-primary-dark/85 via-primary-dark/20 to-transparent" />
         <div className="absolute left-5 top-5 flex flex-wrap gap-2">
-          <Badge variant="success" className="shadow-sm">
-            <ShieldCheck className="size-3.5" />
-            Doğrulanmış Villa
-          </Badge>
+          {isFullyVerified ? (
+            <Badge variant="success" className="shadow-sm">
+              <ShieldCheck className="size-3.5" />
+              Doğrulanmış Villa
+            </Badge>
+          ) : null}
           {villa.concepts.slice(0, 2).map((concept) => (
             <Badge
               key={concept.slug}

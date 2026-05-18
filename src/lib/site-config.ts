@@ -8,10 +8,10 @@ export const siteConfig = {
   socialImage: "/images/villawe/og-default.svg",
   publicNavigation: [
     { href: "/villa-kiralama", label: "Villalar" },
-    { href: "/guvenli-villa-kiralama-rehberi", label: "Güvenli Kiralama Rehberi" },
-    { href: "/blog", label: "Gezi Rehberi" },
+    { href: "/#bolgeler", label: "Bölgeler" },
+    { href: "/#konseptler", label: "Villa Konseptleri" },
+    { href: "/blog", label: "Rehber" },
     { href: "/hakkimizda", label: "Hakkımızda" },
-    { href: "/iletisim", label: "İletişim" },
   ],
   adminNavigation: [
     { href: "/admin", label: "Genel Bakış" },

@@ -179,6 +179,10 @@
     @apply rounded-[2rem] border border-border/80 bg-card shadow-[0_18px_55px_-34px_rgba(18,110,130,0.24)];
   }
 
+  .villawe-floating-card {
+    @apply rounded-[2rem] border border-border/75 bg-card/92 shadow-[0_28px_80px_-42px_rgba(18,110,130,0.34)] backdrop-blur-xl;
+  }
+
   .villawe-soft-panel {
     @apply rounded-[2rem] border border-border/70 bg-muted/80 shadow-[0_18px_50px_-38px_rgba(18,110,130,0.18)];
   }
@@ -189,6 +193,21 @@
 
   .villawe-hero-surface {
     @apply rounded-[2rem] border border-border/70 bg-card/85 shadow-[0_26px_75px_-36px_rgba(18,110,130,0.3)] backdrop-blur-xl;
+  }
+
+  .villawe-image-shell {
+    @apply overflow-hidden rounded-[2rem] border border-border/80 bg-card shadow-[0_28px_70px_-42px_rgba(18,110,130,0.24)];
+  }
+
+  .villawe-section-band {
+    @apply rounded-[2.5rem] border border-border/60 bg-white/55 px-4 py-8 shadow-[0_26px_76px_-46px_rgba(18,110,130,0.18)] backdrop-blur-sm sm:px-6 lg:px-8 lg:py-10;
+  }
+
+  .villawe-gradient-band {
+    background-image:
+      linear-gradient(135deg, rgb(255 255 255 / 0.95), rgb(234 246 246 / 0.85)),
+      radial-gradient(circle at top right, rgb(53 182 180 / 0.12), transparent 35%),
+      radial-gradient(circle at bottom left, rgb(244 124 92 / 0.09), transparent 26%);
   }
 
   .villawe-check-tile {
@@ -205,6 +224,10 @@
 
   .section-kicker {
     @apply text-xs font-semibold tracking-[0.24em] text-primary uppercase;
+  }
+
+  .villawe-rich-copy {
+    @apply text-sm leading-8 text-muted-foreground sm:text-base;
   }
 
   .text-balance-pretty {
