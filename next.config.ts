@@ -17,6 +17,10 @@ if (r2BaseUrl) {
 
 const nextConfig: NextConfig = {
   typedRoutes: true,
+  typescript: {
+    // CI and local validation already run typecheck separately; skip duplicate work in constrained deploy builders.
+    ignoreBuildErrors: true,
+  },
   images: {
     formats: ["image/avif", "image/webp"],
     remotePatterns,
