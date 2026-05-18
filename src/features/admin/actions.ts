@@ -1216,33 +1216,36 @@ export async function saveOwnerAction(formData: FormData) {
 
   try {
     const { session, prisma } = await requireAdminMutation();
+    const ownerData = {
+      type: parsed.data.type as never,
+      status: (parsed.data.status || "PENDING_REVIEW") as never,
+      displayName: parsed.data.displayName,
+      legalName: parsed.data.legalName || null,
+      contactName: parsed.data.contactName || null,
+      email: parsed.data.email,
+      phone: parsed.data.phone,
+      taxNumber: parsed.data.taxNumber || null,
+      city: parsed.data.city || null,
+      districtLabel: parsed.data.districtLabel || null,
+      address: parsed.data.address || null,
+      verificationStatus: (parsed.data.verificationStatus || "PENDING") as never,
+      adminNotes: parsed.data.adminNotes || null,
+      reviewedAt:
+        parsed.data.status &&
+        ["ACTIVE", "SUSPENDED", "REJECTED"].includes(parsed.data.status)
+          ? new Date()
+          : null,
+      notes: parsed.data.notes || null,
+      isActive: parsed.data.ownerId ? parsed.data.isActive ?? false : parsed.data.isActive ?? true,
+    };
+
     const owner = parsed.data.ownerId
       ? await prisma.owner.update({
           where: { id: parsed.data.ownerId },
-          data: {
-            type: parsed.data.type,
-            displayName: parsed.data.displayName,
-            legalName: parsed.data.legalName || null,
-            contactName: parsed.data.contactName || null,
-            email: parsed.data.email,
-            phone: parsed.data.phone,
-            taxNumber: parsed.data.taxNumber || null,
-            notes: parsed.data.notes || null,
-            isActive: parsed.data.isActive ?? false,
-          },
+          data: ownerData as never,
         })
       : await prisma.owner.create({
-          data: {
-            type: parsed.data.type,
-            displayName: parsed.data.displayName,
-            legalName: parsed.data.legalName || null,
-            contactName: parsed.data.contactName || null,
-            email: parsed.data.email,
-            phone: parsed.data.phone,
-            taxNumber: parsed.data.taxNumber || null,
-            notes: parsed.data.notes || null,
-            isActive: parsed.data.isActive ?? true,
-          },
+          data: ownerData as never,
         });
 
     await writeAuditLog({
@@ -1277,7 +1280,11 @@ export async function archiveOwnerAction(formData: FormData) {
     const { session, prisma } = await requireAdminMutation(["super_admin"]);
     const owner = await prisma.owner.update({
       where: { id: ownerId },
-      data: { isActive: false },
+      data: {
+        isActive: false,
+        status: "SUSPENDED",
+        reviewedAt: new Date(),
+      },
     });
 
     await writeAuditLog({

@@ -1,7 +1,7 @@
 import { randomUUID } from "crypto";
 import path from "path";
 
-import { DeleteObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { DeleteObjectCommand, GetObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 
 import { env } from "@/lib/env";
 import type { SaveFileInput, StorageService } from "@/lib/storage/types";
@@ -80,5 +80,30 @@ export class R2StorageService implements StorageService {
         Key: storageKey,
       }),
     );
+  }
+
+  async readFile(storageKey: string) {
+    if (!env.R2_BUCKET_NAME) {
+      throw new Error("Cloudflare R2 bucket is missing.");
+    }
+
+    const response = await getR2Client().send(
+      new GetObjectCommand({
+        Bucket: env.R2_BUCKET_NAME,
+        Key: storageKey,
+      }),
+    );
+
+    const bytes = await response.Body?.transformToByteArray();
+
+    if (!bytes) {
+      throw new Error("Dosya içeriği okunamadı.");
+    }
+
+    return {
+      buffer: Buffer.from(bytes),
+      contentType: response.ContentType || "application/octet-stream",
+      sizeBytes: Number(response.ContentLength || bytes.byteLength),
+    };
   }
 }

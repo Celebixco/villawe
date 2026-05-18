@@ -21,7 +21,14 @@ export type StoredFileResult = {
   altText?: string | undefined;
 };
 
+export type StoredFileReadResult = {
+  buffer: Buffer;
+  contentType: string;
+  sizeBytes: number;
+};
+
 export interface StorageService {
   saveFile(input: SaveFileInput): Promise<StoredFileResult>;
   deleteFile(storageKey: string): Promise<void>;
+  readFile(storageKey: string): Promise<StoredFileReadResult>;
 }

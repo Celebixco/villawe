@@ -176,7 +176,7 @@ type PrismaBlogPostRecord = {
 type PrismaOwnerRecord = {
   id: string;
   displayName: string;
-  type: "AGENCY" | "INDIVIDUAL";
+  type: "AGENCY" | "INDIVIDUAL" | "COMPANY";
   email: string;
   phone: string;
 };
@@ -524,7 +524,12 @@ function mapOwnerFromPrisma(owner: PrismaOwnerRecord): OwnerRecord {
   return {
     id: owner.id,
     displayName: owner.displayName,
-    type: owner.type === "AGENCY" ? "agency" : "individual",
+    type:
+      owner.type === "AGENCY"
+        ? "agency"
+        : owner.type === "COMPANY"
+          ? "company"
+          : "individual",
     email: owner.email,
     phone: owner.phone,
   };

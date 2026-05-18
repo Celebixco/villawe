@@ -74,7 +74,7 @@ export default async function AdminOwnersPage({
                     <div>
                       <h3 className="text-2xl font-semibold tracking-tight">{item.displayName}</h3>
                       <p className="text-sm text-muted-foreground">
-                        {item.type} · {item.villaCount} villa · {item.isActive ? "Aktif" : "Pasif"}
+                        {item.type} · {item.villaCount} villa · {item.status}
                       </p>
                     </div>
                     <div className="flex gap-2">
@@ -94,6 +94,9 @@ export default async function AdminOwnersPage({
                   </div>
                   <p className="text-sm text-muted-foreground">{item.email}</p>
                   <p className="text-sm text-muted-foreground">{item.phone}</p>
+                  {item.adminNotes ? (
+                    <p className="text-sm text-muted-foreground">{item.adminNotes}</p>
+                  ) : null}
                   {item.documents.length ? (
                     <div className="flex flex-wrap gap-2 text-sm">
                       {item.documents.map((document) => (
@@ -127,11 +130,22 @@ export default async function AdminOwnersPage({
                 <div className="grid gap-4 md:grid-cols-2">
                   <select
                     name="type"
-                    defaultValue={owner?.type || "AGENCY"}
+                    defaultValue={owner?.type || "INDIVIDUAL"}
                     className="h-11 rounded-2xl border border-border bg-card px-4 text-sm"
                   >
-                    <option value="AGENCY">Agency</option>
                     <option value="INDIVIDUAL">Individual</option>
+                    <option value="COMPANY">Company</option>
+                    <option value="AGENCY">Agency</option>
+                  </select>
+                  <select
+                    name="status"
+                    defaultValue={owner?.status || "PENDING_REVIEW"}
+                    className="h-11 rounded-2xl border border-border bg-card px-4 text-sm"
+                  >
+                    <option value="PENDING_REVIEW">PENDING_REVIEW</option>
+                    <option value="ACTIVE">ACTIVE</option>
+                    <option value="SUSPENDED">SUSPENDED</option>
+                    <option value="REJECTED">REJECTED</option>
                   </select>
                   <Input name="displayName" defaultValue={owner?.displayName} placeholder="Görünen ad" required />
                   <Input name="legalName" defaultValue={owner?.legalName} placeholder="Yasal ünvan" />
@@ -139,11 +153,25 @@ export default async function AdminOwnersPage({
                   <Input name="email" type="email" defaultValue={owner?.email} placeholder="E-posta" required />
                   <Input name="phone" defaultValue={owner?.phone} placeholder="Telefon" required />
                   <Input name="taxNumber" defaultValue={owner?.taxNumber} placeholder="Vergi no" />
+                  <Input name="city" defaultValue={owner?.city} placeholder="Şehir" />
+                  <Input name="districtLabel" defaultValue={owner?.districtLabel} placeholder="İlçe" />
+                  <Input name="address" defaultValue={owner?.address} placeholder="Adres" />
+                  <select
+                    name="verificationStatus"
+                    defaultValue={owner?.verificationStatus || "PENDING"}
+                    className="h-11 rounded-2xl border border-border bg-card px-4 text-sm"
+                  >
+                    <option value="PENDING">PENDING</option>
+                    <option value="PARTIALLY_VERIFIED">PARTIALLY_VERIFIED</option>
+                    <option value="VERIFIED">VERIFIED</option>
+                    <option value="REJECTED">REJECTED</option>
+                  </select>
                   <label className="villawe-check-tile">
                     <input type="checkbox" name="isActive" value="1" defaultChecked={owner?.isActive ?? true} />
                     <span>Aktif owner kaydı</span>
                   </label>
                 </div>
+                <Textarea name="adminNotes" rows={4} defaultValue={owner?.adminNotes} placeholder="Admin inceleme notları" />
                 <Textarea name="notes" rows={5} defaultValue={owner?.notes} placeholder="Operasyon notları" />
                 <div className="flex justify-end">
                   <Button type="submit" className="rounded-full px-6">

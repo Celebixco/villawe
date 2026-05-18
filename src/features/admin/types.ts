@@ -18,13 +18,24 @@ export type AdminOwnerDocumentRecord = {
 
 export type AdminOwnerRecord = {
   id: string;
-  type: "INDIVIDUAL" | "AGENCY";
+  type: "INDIVIDUAL" | "COMPANY" | "AGENCY";
+  status: "PENDING_REVIEW" | "ACTIVE" | "SUSPENDED" | "REJECTED";
   displayName: string;
   legalName?: string | undefined;
   contactName?: string | undefined;
   email: string;
   phone: string;
   taxNumber?: string | undefined;
+  city?: string | undefined;
+  districtLabel?: string | undefined;
+  address?: string | undefined;
+  verificationStatus:
+    | "PENDING"
+    | "PARTIALLY_VERIFIED"
+    | "VERIFIED"
+    | "REJECTED";
+  adminNotes?: string | undefined;
+  reviewedAt?: string | undefined;
   notes?: string | undefined;
   isActive: boolean;
   villaCount: number;
@@ -197,6 +208,8 @@ export type AdminVillaEditorRecord = {
   checkInTime: string;
   checkOutTime: string;
   publishedAt?: string | undefined;
+  reviewRequestedAt?: string | undefined;
+  ownerRevisionNotes?: string | undefined;
   verification: {
     identityVerified: boolean;
     ownershipOrAuthorityVerified: boolean;

@@ -47,7 +47,8 @@ export async function requireAdminMutation(
 }
 
 export async function writeAuditLog(input: {
-  actorUserId: string;
+  actorUserId?: string;
+  actorType?: "ADMIN" | "OWNER" | "SYSTEM";
   action: string;
   entityType: string;
   entityId: string;
@@ -61,19 +62,24 @@ export async function writeAuditLog(input: {
   }
 
   const data: {
-    actorUserId: string;
+    actorUserId?: string;
+    actorType: "ADMIN" | "OWNER" | "SYSTEM";
     action: string;
     entityType: string;
     entityId: string;
     message: string;
     metadata?: Prisma.InputJsonValue;
   } = {
-    actorUserId: input.actorUserId,
+    actorType: input.actorType || "ADMIN",
     action: input.action,
     entityType: input.entityType,
     entityId: input.entityId,
     message: input.message,
   };
+
+  if (input.actorUserId) {
+    data.actorUserId = input.actorUserId;
+  }
 
   if (input.metadata) {
     data.metadata = input.metadata as Prisma.InputJsonValue;

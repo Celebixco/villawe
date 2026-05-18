@@ -159,15 +159,212 @@ export const availabilityBlockSchema = z.object({
 
 export const ownerFormSchema = z.object({
   ownerId: z.string().optional(),
-  type: z.enum(["INDIVIDUAL", "AGENCY"]),
+  type: z.enum(["INDIVIDUAL", "COMPANY", "AGENCY"]),
+  status: z.enum(["PENDING_REVIEW", "ACTIVE", "SUSPENDED", "REJECTED"]).optional(),
   displayName: z.string().min(3, "Görünen ad zorunludur."),
   legalName: optionalString,
   contactName: optionalString,
   email: z.string().email("Geçerli bir e-posta girin."),
   phone: z.string().min(10, "Telefon numarası zorunludur."),
   taxNumber: optionalString,
+  city: optionalString,
+  districtLabel: optionalString,
+  address: optionalString,
+  verificationStatus: z
+    .enum(["PENDING", "PARTIALLY_VERIFIED", "VERIFIED", "REJECTED"])
+    .optional(),
+  adminNotes: z.string().max(2000).optional().transform((value) => value || undefined),
   notes: z.string().max(2000).optional().transform((value) => value || undefined),
   isActive: truthy.optional(),
+}).superRefine((value, ctx) => {
+  if ((value.type === "COMPANY" || value.type === "AGENCY") && !value.legalName) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Şirket veya acente için ticari ünvan girin.",
+      path: ["legalName"],
+    });
+  }
+});
+
+export const ownerRegistrationSchema = z
+  .object({
+    fullName: z.string().min(3, "Ad soyad zorunludur."),
+    email: z.string().email("Geçerli bir e-posta girin."),
+    phone: z.string().min(10, "Telefon numarası zorunludur."),
+    password: z.string().min(8, "Şifre en az 8 karakter olmalıdır."),
+    passwordConfirm: z.string().min(8, "Şifre tekrarı zorunludur."),
+    ownerType: z.enum(["INDIVIDUAL", "COMPANY", "AGENCY"]),
+    companyName: optionalString,
+    taxNumber: optionalString,
+    city: z.string().min(2, "Şehir bilgisi zorunludur."),
+    district: z.string().min(2, "İlçe bilgisi zorunludur."),
+    address: z.string().min(10, "Adres bilgisi zorunludur."),
+  })
+  .superRefine((value, ctx) => {
+    if (value.password !== value.passwordConfirm) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Şifre tekrarı eşleşmiyor.",
+        path: ["passwordConfirm"],
+      });
+    }
+
+    if ((value.ownerType === "COMPANY" || value.ownerType === "AGENCY") && !value.companyName) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Şirket/acente adı zorunludur.",
+        path: ["companyName"],
+      });
+    }
+  });
+
+export const ownerLoginSchema = z.object({
+  email: z.string().email("Geçerli bir e-posta girin."),
+  password: z.string().min(8, "Şifre en az 8 karakter olmalıdır."),
+});
+
+export const ownerPasswordResetRequestSchema = z.object({
+  email: z.string().email("Geçerli bir e-posta girin."),
+});
+
+const ownerVillaBaseSchema = z.object({
+  title: z.string().min(3, "Villa adı zorunludur."),
+  shortDescription: z.string().min(20, "Kısa açıklama çok kısa."),
+  description: z.string().min(80, "Detaylı açıklama çok kısa."),
+  regionId: z.string().min(1, "Bölge seçimi zorunludur."),
+  districtId: z.string().min(1, "İlçe seçimi zorunludur."),
+  neighborhoodId: optionalString,
+  addressPublic: z.string().min(5, "Yaklaşık konum zorunludur."),
+  addressPrivate: z.string().min(10, "Açık adres zorunludur."),
+  maxGuests: z.coerce.number().int().min(1).max(20),
+  bedroomCount: z.coerce.number().int().min(1).max(20),
+  bathroomCount: z.coerce.number().int().min(1).max(20),
+  bedCount: z.coerce.number().int().min(1).max(30),
+  checkInTime: z.string().min(1, "Giriş saati zorunludur."),
+  checkOutTime: z.string().min(1, "Çıkış saati zorunludur."),
+  minNights: z.coerce.number().int().min(1).max(60),
+  basePrice: z.coerce.number().min(0),
+  cleaningFee: z.coerce.number().min(0),
+  depositAmount: z.coerce.number().min(0),
+  serviceFeeType: z.enum(["NONE", "FIXED", "PERCENTAGE", "INCLUDED"]),
+  serviceFeeValue: z.coerce.number().min(0),
+  extraGuestFee: z.coerce.number().min(0),
+  hasPrivatePool: truthy.optional(),
+  hasHeatedPool: truthy.optional(),
+  hasJacuzzi: truthy.optional(),
+  isShelteredPool: truthy.optional(),
+  isConservativeFriendly: truthy.optional(),
+  isPetFriendly: truthy.optional(),
+  isChildFriendly: truthy.optional(),
+  isFamilyFriendly: truthy.optional(),
+  hasSeaView: truthy.optional(),
+  hasNatureView: truthy.optional(),
+  nearBeach: truthy.optional(),
+  nearCenter: truthy.optional(),
+  hasBarbecue: truthy.optional(),
+  hasFireplace: truthy.optional(),
+  hasParking: truthy.optional(),
+  hasAirConditioning: truthy.optional(),
+  hasInternet: truthy.optional(),
+  isWheelchairFriendly: truthy.optional(),
+  amenities: z.array(z.string().min(1)).default([]),
+  concepts: z.array(z.string().min(1)).default([]),
+  houseRules: z.array(z.string().min(1)).default([]),
+  poolDetails: z.array(z.string().min(1)).default([]),
+  nearbyPlaces: z.array(z.string().min(1)).default([]),
+  cancellationPolicyId: optionalString,
+  depositPolicyId: optionalString,
+});
+
+export const ownerVillaCreateSchema = ownerVillaBaseSchema;
+
+export const ownerVillaBasicsSchema = ownerVillaBaseSchema.extend({
+  villaId: z.string().min(1),
+});
+
+export const ownerVillaReviewSubmitSchema = z.object({
+  villaId: z.string().min(1),
+});
+
+export const ownerVillaPricingSchema = z.object({
+  villaId: z.string().min(1),
+  basePrice: z.coerce.number().min(0),
+  cleaningFee: z.coerce.number().min(0),
+  depositAmount: z.coerce.number().min(0),
+  serviceFeeType: z.enum(["NONE", "FIXED", "PERCENTAGE", "INCLUDED"]),
+  serviceFeeValue: z.coerce.number().min(0),
+  extraGuestFee: z.coerce.number().min(0),
+  minNights: z.coerce.number().int().min(1).max(60),
+});
+
+export const ownerSeasonPriceSchema = z
+  .object({
+    villaId: z.string().min(1),
+    seasonId: z.string().optional(),
+    name: z.string().min(2, "Sezon adı zorunludur."),
+    startDate: z.string().min(1, "Başlangıç tarihi zorunludur."),
+    endDate: z.string().min(1, "Bitiş tarihi zorunludur."),
+    nightlyPrice: z.coerce.number().min(0),
+    minNightsOverride: z.coerce.number().int().min(1).max(60).optional(),
+    cleaningFeeOverride: z.coerce.number().min(0).optional(),
+    depositOverride: z.coerce.number().min(0).optional(),
+    serviceFeeOverride: z.coerce.number().min(0).optional(),
+    extraGuestFeeOverride: z.coerce.number().min(0).optional(),
+  })
+  .superRefine((value, ctx) => {
+    if (!isValidDateString(value.startDate) || !isValidDateString(value.endDate)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Sezon tarihleri geçersiz.",
+        path: ["startDate"],
+      });
+      return;
+    }
+
+    if (new Date(value.startDate) > new Date(value.endDate)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Bitiş tarihi başlangıç tarihinden önce olamaz.",
+        path: ["endDate"],
+      });
+    }
+  });
+
+export const ownerAvailabilityBlockSchema = z
+  .object({
+    villaId: z.string().min(1),
+    blockId: z.string().optional(),
+    startDate: z.string().min(1, "Başlangıç tarihi zorunludur."),
+    endDate: z.string().min(1, "Bitiş tarihi zorunludur."),
+    reasonCode: z.enum(["owner_block", "maintenance", "reserved_elsewhere", "other"]),
+    reason: z.string().max(500).optional(),
+  })
+  .superRefine((value, ctx) => {
+    if (!isValidDateString(value.startDate) || !isValidDateString(value.endDate)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Müsaitlik tarihleri geçersiz.",
+        path: ["startDate"],
+      });
+      return;
+    }
+
+    if (new Date(value.startDate) > new Date(value.endDate)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Bitiş tarihi başlangıç tarihinden önce olamaz.",
+        path: ["endDate"],
+      });
+    }
+  });
+
+export const ownerInquirySeenSchema = z.object({
+  inquiryId: z.string().min(1),
+});
+
+export const ownerInquiryNoteSchema = z.object({
+  inquiryId: z.string().min(1),
+  ownerNote: z.string().min(2, "Not alanı çok kısa.").max(2000),
 });
 
 export const blogPostFormSchema = z.object({
