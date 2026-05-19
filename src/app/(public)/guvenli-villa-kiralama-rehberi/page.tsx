@@ -5,18 +5,22 @@ import { buildMetadata } from "@/features/seo/metadata";
 
 export const metadata = buildMetadata({
   title: "Güvenli Villa Kiralama Rehberi | Villawe",
-  description: "Sahte ilan ve platform dışı ödeme risklerini azaltmak için güvenli villa kiralama rehberi.",
+  description:
+    "Sahte ilan ve platform dışı ödeme risklerini azaltmak için güvenli villa kiralama rehberi.",
   path: "/guvenli-villa-kiralama-rehberi",
 });
 
 export default function SafeGuidePage() {
   return (
-    <div className="container-shell space-y-8 py-12">
-      <SectionHeading
-        kicker="Güvenli Kiralama Rehberi"
-        title="Güvenli villa kiralama rehberi"
-        description="Kullanıcıyı önce koruyan, sonra dönüştüren bir kiralama akışı için temel kontrol listemiz."
-      />
+    <div className="container-shell space-y-10 py-10 sm:py-12">
+      <section className="villawe-section-band villawe-gradient-band space-y-6">
+        <SectionHeading
+          kicker="Güvenli Kiralama Rehberi"
+          title="Güvenli villa kiralama rehberi"
+          description="Kullanıcıyı önce koruyan, sonra dönüştüren bir kiralama akışı için temel kontrol listemiz."
+        />
+      </section>
+
       <div className="grid gap-6 lg:grid-cols-3">
         {[
           "İlan yetkisi ve kimlik doğrulaması tamamlandı mı?",
@@ -31,6 +35,7 @@ export default function SafeGuidePage() {
           </Card>
         ))}
       </div>
+
       <SafeRentalAlert />
     </div>
   );

@@ -112,6 +112,20 @@ export default async function AdminVillaDetailPage({
         <DataSourceNotice tone="info" title="İşlem kaydedildi" body="Villa yönetim aksiyonu başarıyla uygulandı." />
       ) : null}
       {error ? <DataSourceNotice tone="error" title="İşlem tamamlanamadı" body={error} /> : null}
+      {villa.reviewRequestedAt || villa.ownerRevisionNotes ? (
+        <DataSourceNotice
+          tone="info"
+          title="Ev sahibi gönderim durumu"
+          body={[
+            villa.reviewRequestedAt
+              ? `İnceleme talebi: ${new Date(villa.reviewRequestedAt).toLocaleString("tr-TR")}.`
+              : null,
+            villa.ownerRevisionNotes || null,
+          ]
+            .filter(Boolean)
+            .join(" ")}
+        />
+      ) : null}
 
       {villa.publishWarnings.length ? (
         <DataSourceNotice

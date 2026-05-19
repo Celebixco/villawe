@@ -176,7 +176,7 @@ type PrismaBlogPostRecord = {
 type PrismaOwnerRecord = {
   id: string;
   displayName: string;
-  type: "AGENCY" | "INDIVIDUAL";
+  type: "AGENCY" | "INDIVIDUAL" | "COMPANY";
   email: string;
   phone: string;
 };
@@ -524,7 +524,12 @@ function mapOwnerFromPrisma(owner: PrismaOwnerRecord): OwnerRecord {
   return {
     id: owner.id,
     displayName: owner.displayName,
-    type: owner.type === "AGENCY" ? "agency" : "individual",
+    type:
+      owner.type === "AGENCY"
+        ? "agency"
+        : owner.type === "COMPANY"
+          ? "company"
+          : "individual",
     email: owner.email,
     phone: owner.phone,
   };
@@ -607,6 +612,7 @@ function villaHasConcept(villa: VillaDetail, conceptSlug: string) {
 function matchesFilters(villa: VillaDetail, params: URLSearchParams) {
   const region = params.get("region");
   const district = params.get("district");
+  const concept = params.get("concept");
   const guests = Number(params.get("guests") || 0);
   const bedrooms = Number(params.get("bedrooms") || 0);
   const bathrooms = Number(params.get("bathrooms") || 0);
@@ -615,6 +621,7 @@ function matchesFilters(villa: VillaDetail, params: URLSearchParams) {
 
   if (region && villa.region.slug !== region) return false;
   if (district && villa.district.slug !== district) return false;
+  if (concept && !villaHasConcept(villa, concept)) return false;
   if (guests && villa.maxGuests < guests) return false;
   if (bedrooms && villa.bedroomCount < bedrooms) return false;
   if (bathrooms && villa.bathroomCount < bathrooms) return false;
@@ -630,6 +637,11 @@ function matchesFilters(villa: VillaDetail, params: URLSearchParams) {
   if (params.get("nearCenter") === "1" && !villa.features.nearCenter) return false;
   if (params.get("seaView") === "1" && !villa.features.hasSeaView) return false;
   if (params.get("natureView") === "1" && !villa.features.hasNatureView) return false;
+  if (params.get("barbecue") === "1" && !villa.features.hasBarbecue) return false;
+  if (params.get("fireplace") === "1" && !villa.features.hasFireplace) return false;
+  if (params.get("parking") === "1" && !villa.features.hasParking) return false;
+  if (params.get("airConditioning") === "1" && !villa.features.hasAirConditioning) return false;
+  if (params.get("internet") === "1" && !villa.features.hasInternet) return false;
   if (params.get("wheelchairFriendly") === "1" && !villa.features.isWheelchairFriendly) return false;
   if (params.get("honeymoon") === "1" && !villaHasConcept(villa, "balayi-villalari")) return false;
   if (params.get("childPool") === "1" && !villaHasConcept(villa, "cocuk-havuzlu-villa")) return false;
@@ -637,6 +649,34 @@ function matchesFilters(villa: VillaDetail, params: URLSearchParams) {
   if (params.get("economicalVilla") === "1" && villa.pricing.basePrice > 9500) return false;
 
   return true;
+}
+
+function sortVillas(villas: VillaDetail[], params: URLSearchParams) {
+  const sort = params.get("sort");
+
+  if (!sort) {
+    return villas;
+  }
+
+  const items = [...villas];
+
+  if (sort === "price-asc") {
+    return items.sort((left, right) => left.pricing.basePrice - right.pricing.basePrice);
+  }
+
+  if (sort === "price-desc") {
+    return items.sort((left, right) => right.pricing.basePrice - left.pricing.basePrice);
+  }
+
+  if (sort === "guests-desc") {
+    return items.sort((left, right) => right.maxGuests - left.maxGuests);
+  }
+
+  if (sort === "bedrooms-desc") {
+    return items.sort((left, right) => right.bedroomCount - left.bedroomCount);
+  }
+
+  return villas;
 }
 
 async function withPublicReadCache<T>(key: string, ttlSeconds: number, loader: () => Promise<T>) {
@@ -764,7 +804,10 @@ export async function getListingResults(
 
   return withPublicReadCache(cacheKey, 180, async () => {
     const villas = await getAllPublishedVillas();
-    return villas.filter((villa) => matchesFilters(villa, params));
+    return sortVillas(
+      villas.filter((villa) => matchesFilters(villa, params)),
+      params,
+    );
   });
 }
 

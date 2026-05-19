@@ -15,7 +15,15 @@ enum UserStatus {
 
 enum OwnerType {
   INDIVIDUAL
+  COMPANY
   AGENCY
+}
+
+enum OwnerStatus {
+  PENDING_REVIEW
+  ACTIVE
+  SUSPENDED
+  REJECTED
 }
 
 enum VillaStatus {
@@ -112,6 +120,12 @@ enum ReplyAuthorType {
   OWNER
 }
 
+enum AuditActorType {
+  ADMIN
+  OWNER
+  SYSTEM
+}
+
 enum PricingRuleType {
   EXTRA_GUEST
   MIN_NIGHTS
@@ -191,12 +205,19 @@ model Owner {
   id           String          @id @default(cuid())
   userId       String?         @unique @map("user_id")
   type         OwnerType       @default(INDIVIDUAL)
+  status       OwnerStatus     @default(PENDING_REVIEW)
   displayName  String          @map("display_name")
   legalName    String?         @map("legal_name")
   contactName  String?         @map("contact_name")
   email        String
   phone        String
   taxNumber    String?         @map("tax_number")
+  city         String?
+  districtLabel String?        @map("district_label")
+  address      String?
+  verificationStatus VerificationStatus @default(PENDING) @map("verification_status")
+  adminNotes   String?         @map("admin_notes")
+  reviewedAt   DateTime?       @map("reviewed_at")
   notes        String?
   isActive     Boolean         @default(true) @map("is_active")
   createdAt    DateTime        @default(now()) @map("created_at")
@@ -407,6 +428,8 @@ model Villa {
   cancellationPolicyId   String?              @map("cancellation_policy_id")
   depositPolicyId        String?              @map("deposit_policy_id")
   verificationStatus     VerificationStatus   @default(PENDING) @map("verification_status")
+  reviewRequestedAt      DateTime?            @map("review_requested_at")
+  ownerRevisionNotes     String?              @map("owner_revision_notes")
   summaryFacts           Json?                @map("summary_facts")
   houseRules             Json?
   poolDetails            Json?                @map("pool_details")
@@ -622,6 +645,8 @@ model Inquiry {
   offPlatformPaymentWarningAcknowledged Boolean      @default(false) @map("off_platform_payment_warning_acknowledged")
   estimatedTotal                       Decimal?      @db.Decimal(10, 2) @map("estimated_total")
   pricingSnapshot                      Json?         @map("pricing_snapshot")
+  ownerSeenAt                          DateTime?     @map("owner_seen_at")
+  ownerNote                            String?       @map("owner_note")
   createdAt                            DateTime      @default(now()) @map("created_at")
   updatedAt                            DateTime      @updatedAt @map("updated_at")
   villa                                Villa         @relation(fields: [villaId], references: [id], onDelete: Cascade)
@@ -874,6 +899,7 @@ model Setting {
 model AuditLog {
   id          String   @id @default(cuid())
   actorUserId String?  @map("actor_user_id")
+  actorType   AuditActorType @default(SYSTEM) @map("actor_type")
   action      String
   entityType  String   @map("entity_type")
   entityId    String   @map("entity_id")

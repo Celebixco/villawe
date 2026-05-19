@@ -11,12 +11,15 @@ export const metadata = buildMetadata({
 
 export default function FaqPage() {
   return (
-    <div className="container-shell space-y-8 py-12">
-      <SectionHeading
-        kicker="Sık Sorulan Sorular"
-        title="Sık sorulan sorular"
-        description="Doğrulama, fiyatlama ve rezervasyon talep akışıyla ilgili temel sorular."
-      />
+    <div className="container-shell space-y-10 py-10 sm:py-12">
+      <section className="villawe-section-band villawe-gradient-band space-y-6">
+        <SectionHeading
+          kicker="Sık Sorulan Sorular"
+          title="Sık sorulan sorular"
+          description="Doğrulama, fiyatlama ve rezervasyon talep akışıyla ilgili temel sorular."
+        />
+      </section>
+
       <div className="space-y-4">
         {demoPolicies.faqs.map((faq) => (
           <Card key={faq.question} className="villawe-panel">

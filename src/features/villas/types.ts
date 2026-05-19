@@ -181,7 +181,7 @@ export type BlogPostRecord = {
 export type OwnerRecord = {
   id: string;
   displayName: string;
-  type: "individual" | "agency";
+  type: "individual" | "company" | "agency";
   email: string;
   phone: string;
 };

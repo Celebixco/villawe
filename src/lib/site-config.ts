@@ -8,10 +8,10 @@ export const siteConfig = {
   socialImage: "/images/villawe/og-default.svg",
   publicNavigation: [
     { href: "/villa-kiralama", label: "Villalar" },
-    { href: "/guvenli-villa-kiralama-rehberi", label: "Güvenli Kiralama Rehberi" },
-    { href: "/blog", label: "Gezi Rehberi" },
+    { href: "/#bolgeler", label: "Bölgeler" },
+    { href: "/#konseptler", label: "Villa Konseptleri" },
+    { href: "/blog", label: "Rehber" },
     { href: "/hakkimizda", label: "Hakkımızda" },
-    { href: "/iletisim", label: "İletişim" },
   ],
   adminNavigation: [
     { href: "/admin", label: "Genel Bakış" },
@@ -25,7 +25,14 @@ export const siteConfig = {
     { href: "/admin/settings", label: "Ayarlar" },
     { href: "/admin/audit-logs", label: "Audit Log" },
   ],
+  ownerNavigation: [
+    { href: "/ev-sahibi/panel", label: "Genel Bakış" },
+    { href: "/ev-sahibi/panel/villalar", label: "Villalarım" },
+    { href: "/ev-sahibi/panel/talepler", label: "Talepler" },
+    { href: "/ev-sahibi/panel/villalar/yeni", label: "Yeni Villa" },
+  ],
 } as const;
 
 export type PublicNavigationItem = (typeof siteConfig.publicNavigation)[number];
 export type AdminNavigationItem = (typeof siteConfig.adminNavigation)[number];
+export type OwnerNavigationItem = (typeof siteConfig.ownerNavigation)[number];
