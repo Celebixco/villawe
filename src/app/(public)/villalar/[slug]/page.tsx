@@ -34,6 +34,7 @@ import {
 } from "@/features/seo/metadata";
 import { getSimilarVillas, getVillaBySlug } from "@/features/villas/queries";
 import { getDatabaseHealth } from "@/lib/db/prisma";
+import { parseDemoVillaTitle } from "@/lib/demo-villa";
 
 export const dynamic = "force-dynamic";
 
@@ -114,6 +115,7 @@ export default async function VillaDetailPage({
   }
 
   const similarVillas = await getSimilarVillas(slug);
+  const titleMeta = parseDemoVillaTitle(villa.title);
 
   const breadcrumbJsonLd = buildBreadcrumbJsonLd([
     { name: "Villawe", path: "/" },
@@ -225,7 +227,7 @@ export default async function VillaDetailPage({
             {villa.region.name}
           </Link>
           <span>/</span>
-          <span className="text-foreground">{villa.title}</span>
+          <span className="text-foreground">{titleMeta.displayTitle}</span>
         </nav>
 
         <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
@@ -234,6 +236,9 @@ export default async function VillaDetailPage({
               <p className="section-kicker">
                 {villa.region.name} / {villa.district.name}
               </p>
+              {titleMeta.isDemo ? (
+                <Badge variant="warning">{titleMeta.demoBadgeLabel}</Badge>
+              ) : null}
               {villa.verification.identityVerified &&
               villa.verification.ownershipOrAuthorityVerified &&
               villa.verification.tourismPermitVerified ? (
@@ -245,7 +250,7 @@ export default async function VillaDetailPage({
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div className="space-y-3">
                   <h1 className="max-w-4xl text-4xl font-semibold tracking-tight text-balance sm:text-5xl xl:text-6xl">
-                    {villa.title}
+                    {titleMeta.displayTitle}
                   </h1>
                   <p className="inline-flex items-center gap-2 text-sm text-muted-foreground">
                     <MapPin className="size-4 text-secondary" />
@@ -281,6 +286,24 @@ export default async function VillaDetailPage({
                   </p>
                   <p className="mt-2 text-3xl font-semibold tracking-tight text-foreground">
                     {villa.pricing.minNights} gece
+                  </p>
+                </div>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="rounded-[1.4rem] border border-border/70 bg-card px-4 py-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+                    Temizlik
+                  </p>
+                  <p className="mt-2 text-2xl font-semibold tracking-tight text-foreground">
+                    ₺{villa.pricing.cleaningFee.toLocaleString("tr-TR")}
+                  </p>
+                </div>
+                <div className="rounded-[1.4rem] border border-border/70 bg-card px-4 py-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+                    Depozito
+                  </p>
+                  <p className="mt-2 text-2xl font-semibold tracking-tight text-foreground">
+                    ₺{villa.pricing.depositAmount.toLocaleString("tr-TR")}
                   </p>
                 </div>
               </div>

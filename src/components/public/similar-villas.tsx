@@ -16,7 +16,7 @@ export function SimilarVillas({ villas }: SimilarVillasProps) {
         <p className="section-kicker">Benzer Seçenekler</p>
         <h2 className="text-4xl font-semibold tracking-tight">Bunlar da ilginizi çekebilir</h2>
       </div>
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
         {villas.map((villa) => (
           <VillaCard key={villa.id} villa={villa} />
         ))}

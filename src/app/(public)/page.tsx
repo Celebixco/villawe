@@ -24,6 +24,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { buildMetadata } from "@/features/seo/metadata";
 import { getHomePageData } from "@/features/villas/queries";
 import { getDatabaseHealth } from "@/lib/db/prisma";
+import { parseDemoVillaTitle } from "@/lib/demo-villa";
 
 export const dynamic = "force-dynamic";
 
@@ -74,6 +75,9 @@ export default async function HomePage() {
   );
   const heroImage = spotlightVilla?.coverImage.url || "/images/villawe/villa-luna.svg";
   const heroImageAlt = spotlightVilla?.coverImage.alt || "Villawe öne çıkan villa";
+  const spotlightTitle = parseDemoVillaTitle(
+    spotlightVilla?.title || "Akdeniz esintili premium konaklama",
+  );
 
   const trustItems = [
     {
@@ -103,8 +107,11 @@ export default async function HomePage() {
   ];
 
   const curatedRegions = data.regions.slice(0, 5);
-  const featuredVillas = data.featured.length ? data.featured : data.verified;
-  const newestVillas = data.newest.length ? data.newest : data.villas.slice(0, 3);
+  const featuredVillas = (data.featured.length ? data.featured : data.verified.length ? data.verified : data.villas).slice(0, 5);
+  const featuredVillaSlugs = new Set(featuredVillas.map((villa) => villa.slug));
+  const newestVillas = (data.newest.length ? data.newest : data.villas)
+    .filter((villa) => !featuredVillaSlugs.has(villa.slug))
+    .slice(0, 3);
 
   return (
     <div className="pb-18">
@@ -164,6 +171,14 @@ export default async function HomePage() {
                 <div className="absolute inset-0 bg-gradient-to-t from-primary-dark/88 via-primary-dark/18 to-transparent" />
                 <div className="absolute inset-x-0 bottom-0 space-y-4 p-6 text-white sm:p-7">
                   <div className="flex flex-wrap gap-2">
+                    {spotlightTitle.isDemo ? (
+                      <Badge
+                        variant="warning"
+                        className="border-white/16 bg-white/10 text-white"
+                      >
+                        {spotlightTitle.demoBadgeLabel}
+                      </Badge>
+                    ) : null}
                     {spotlightVerified ? (
                       <Badge
                         variant="success"
@@ -178,13 +193,23 @@ export default async function HomePage() {
                   </div>
                   <div className="space-y-2">
                     <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-                      {spotlightVilla?.title || "Akdeniz esintili premium konaklama"}
+                      {spotlightTitle.displayTitle}
                     </h2>
                     <p className="max-w-md text-sm leading-7 text-white/80">
                       {spotlightVilla?.shortDescription ||
                         "Yüksek kaliteli villa seçkisi, güçlü doğrulama mantığı ve güven veren bir talep deneyimi."}
                     </p>
                   </div>
+                  {spotlightVilla ? (
+                    <div className="flex flex-wrap gap-2 text-xs font-medium text-white/88">
+                      <span className="rounded-full border border-white/16 bg-white/10 px-3 py-2">
+                        Başlangıç ₺{spotlightVilla.pricing.basePrice.toLocaleString("tr-TR")}
+                      </span>
+                      <span className="rounded-full border border-white/16 bg-white/10 px-3 py-2">
+                        {spotlightVilla.maxGuests} kişiye kadar konaklama
+                      </span>
+                    </div>
+                  ) : null}
                   <div className="flex flex-wrap gap-2 text-xs font-medium text-white/86">
                     <span className="rounded-full border border-white/16 bg-white/10 px-3 py-2">
                       Geniş villa galerileri
@@ -326,7 +351,7 @@ export default async function HomePage() {
         />
 
         {!inventoryUnavailable && featuredVillas.length ? (
-          <div className="mt-8 grid gap-6 lg:grid-cols-3">
+          <div className="mt-8 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
             {featuredVillas.map((villa) => (
               <VillaCard key={villa.id} villa={villa} />
             ))}
@@ -426,7 +451,7 @@ export default async function HomePage() {
         />
 
         {!inventoryUnavailable && newestVillas.length ? (
-          <div className="mt-8 grid gap-6 lg:grid-cols-3">
+          <div className="mt-8 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
             {newestVillas.map((villa) => (
               <VillaCard key={villa.id} villa={villa} />
             ))}

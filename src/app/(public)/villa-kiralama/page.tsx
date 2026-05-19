@@ -276,7 +276,7 @@ export default async function VillaListingPage({
             ))}
           </div>
 
-          <div className="grid gap-6 lg:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
             {villas.map((villa) => (
               <VillaCard key={villa.id} villa={villa} />
             ))}

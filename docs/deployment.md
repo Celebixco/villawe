@@ -5,14 +5,14 @@
 Villawe production dağıtımı için önerilen servis topolojisi:
 
 - Next.js app service
-- Self-hosted Supabase PostgreSQL service
+- Standalone PostgreSQL service
 - Self-hosted Redis service
 - Cloudflare R2 external bucket
 - GitHub deploy source
 
 Bu profilde kritik kararlar:
 
-- Supabase yalnızca PostgreSQL/database katmanı olarak kullanılır.
+- Villawe production veritabanı plain Coolify PostgreSQL üzerinde çalışır.
 - Admin authentication mevcut signed-cookie yapısında kalır.
 - Villa medya ve dokümanları için Supabase Storage kullanılmaz; Cloudflare R2 kaynak doğrusu olmaya devam eder.
 
@@ -42,8 +42,8 @@ Zorunlu üretim alanları:
 ## Example Coolify Values
 
 ```env
-DATABASE_URL=postgresql://postgres:strong-password@supabase-db:5432/villawe?schema=public
-DIRECT_URL=postgresql://postgres:strong-password@supabase-db:5432/villawe?schema=public
+DATABASE_URL=postgresql://villawe:strong-password@villawe-postgres:5432/villawe?schema=public
+DIRECT_URL=postgresql://villawe:strong-password@villawe-postgres:5432/villawe?schema=public
 REDIS_URL=redis://redis:6379
 SESSION_SECRET=replace-with-a-strong-random-secret-at-least-32-characters
 R2_ACCOUNT_ID=your-account-id
@@ -57,13 +57,13 @@ NEXT_PUBLIC_SITE_URL=https://villawe.com
 DEMO_MODE=false
 ```
 
-## Supabase / Postgres Notes
+## PostgreSQL Notes
 
-- Coolify üzerinde self-hosted Supabase stack ya da self-hosted Supabase Postgres servisi kullanılabilir.
+- Coolify üzerinde standalone PostgreSQL servisi kullanılmalıdır.
 - Villawe uygulaması yalnızca PostgreSQL bağlantısını tüketir.
 - Prisma runtime bağlantısı `DATABASE_URL` ile kurulur.
 - Prisma migration/deploy akışı gerekirse `DIRECT_URL` ile ayrıştırılabilir.
-- Örnek bağlantı deseni: `postgresql://postgres:<password>@supabase-db:5432/villawe?schema=public`
+- Örnek bağlantı deseni: `postgresql://villawe:<password>@villawe-postgres:5432/villawe?schema=public`
 - Production’da demo fallback devre dışıdır; `DATABASE_URL` hatalıysa public sayfalar güvenli bakım durumu gösterir, admin ekranları kontrollü yapılandırma/veritabanı hatası döner.
 
 ## Redis Notes
@@ -87,7 +87,7 @@ Redis erişilemezse uygulama çalışmaya devam eder; cache ve rate limiting gü
 ## Pre-Deploy Checklist
 
 1. `DEMO_MODE=false` olduğundan emin olun.
-2. `DATABASE_URL` self-hosted Supabase/Postgres’e işaret etmeli.
+2. `DATABASE_URL` Coolify PostgreSQL servisine işaret etmeli.
 3. Gerekliyse `DIRECT_URL` migration/deploy bağlantısı olarak ayrı tanımlanmalı.
 4. `REDIS_URL` self-hosted Redis servisine işaret etmeli.
 5. `SESSION_SECRET` güçlü ve en az 32 karakter olmalı.
