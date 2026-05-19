@@ -6,7 +6,7 @@
 - TypeScript strict mode
 - Tailwind CSS v4
 - shadcn/ui
-- Self-hosted Supabase PostgreSQL on Coolify + Prisma
+- Standalone PostgreSQL on Coolify + Prisma
 - Self-hosted Redis on Coolify for cache / rate limiting foundations
 - Zod validation
 - Cookie-based admin auth with signed JWT sessions
@@ -31,7 +31,7 @@ Villawe needs a relationally rich backoffice from day one: villas, seasons, veri
 - Public pages are server-rendered and SEO-first.
 - Admin routes enforce server-side session and role checks.
 - Prisma runtime connects through `DATABASE_URL`; Prisma CLI can use `DIRECT_URL` when a separate migration path is needed.
-- Villawe uses Supabase only as the PostgreSQL layer in this deployment profile; Supabase Auth and Supabase Storage are intentionally not in scope.
+- Villawe uses standalone PostgreSQL in this deployment profile; Supabase Auth and Supabase Storage are intentionally not in scope.
 - Redis is reserved for rate limiting, public cache layers, and future queue/availability workloads.
 - Database access is lazy-initialized to stay build-safe.
 - Demo data is allowed only outside production when `DEMO_MODE=true`.

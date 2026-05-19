@@ -53,7 +53,7 @@ export function VillaGallery({ title, items }: VillaGalleryProps) {
             </div>
             <div className="inline-flex items-center gap-2 rounded-full border border-white/16 bg-white/10 px-3 py-2 text-xs font-semibold">
               <Camera className="size-3.5" />
-              +{media.length}
+              {media.length} fotoğraf
             </div>
           </div>
         </div>
@@ -85,7 +85,7 @@ export function VillaGallery({ title, items }: VillaGalleryProps) {
               {showOverlay ? (
                 <span className="absolute inset-0 flex items-center justify-center bg-primary-dark/68 text-sm font-semibold text-white">
                   <Images className="mr-2 size-4" />
-                  +{extraCount} Fotoğraf
+                  +{extraCount} daha
                 </span>
               ) : null}
             </button>

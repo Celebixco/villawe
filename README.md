@@ -8,7 +8,7 @@ Villawe, doğrulanmış ve şeffaf villa kiralama deneyimi için tasarlanan trus
 - TypeScript strict mode
 - Tailwind CSS v4
 - shadcn/ui
-- Self-hosted Supabase PostgreSQL + Prisma
+- Standalone Coolify PostgreSQL + Prisma
 - Self-hosted Redis
 - Zod validation
 - Signed-cookie admin session
@@ -48,14 +48,13 @@ NEXT_PUBLIC_SITE_URL="https://villawe.com"
 Villawe production dağıtımı Coolify üzerinde şu servislerle hedeflenir:
 
 - Next.js uygulama servisi
-- Self-hosted Supabase PostgreSQL servisi
+- Standalone PostgreSQL servisi
 - Self-hosted Redis servisi
 - Cloudflare R2 external bucket
 - GitHub deploy source
 
 Önemli sınırlar:
 
-- Supabase bu profilde yalnızca PostgreSQL katmanı olarak kullanılır.
 - Mevcut signed-cookie admin auth korunur; Supabase Auth’a geçilmez.
 - Villa medya ve dokümanları Supabase Storage’a taşınmaz; R2 kaynak doğrusu olmaya devam eder.
 
@@ -119,7 +118,7 @@ npm run dev
 
 `prisma/seed.ts` artık seed kayıtlarını idempotent şekilde upsert eder. Yeniden çalıştırıldığında tüm veritabanını silmez; yalnızca seed kapsamındaki demo/içerik kayıtlarını günceller ve eksik olanları ekler. Seed villaları başlıklarında `[Seed]` etiketi taşır; production envanteri yerine development örneği oldukları açıkça görünür.
 
-Prisma runtime bağlantısı uygulama içinde `DATABASE_URL` üzerinden kurulur. Eğer migration akışını ayrı bir bağlantı ile çalıştırmak isterseniz Prisma CLI için `DIRECT_URL` tanımlayabilirsiniz. Bu, self-hosted Supabase/Postgres üzerinde connection policy ayırmak istediğiniz kurulumlarda faydalıdır.
+Prisma runtime bağlantısı uygulama içinde `DATABASE_URL` üzerinden kurulur. Eğer migration akışını ayrı bir bağlantı ile çalıştırmak isterseniz Prisma CLI için `DIRECT_URL` tanımlayabilirsiniz. Bu, Coolify üzerindeki standalone PostgreSQL servisi için uygulama runtime ve CLI bağlantısını ayırmak istediğiniz kurulumlarda faydalıdır.
 
 ## Yerel Demo Akışı
 
@@ -199,7 +198,7 @@ Gerçek veritabanı seed’i ile admin kullanıcı şu env alanlarına göre olu
 - Production build demo veriye dayanmaz.
 - `.env.example` içindeki `DEMO_MODE="false"` güvenli varsayılandır; demo mod yalnızca bilinçli olarak açılmalıdır.
 - `DATABASE_URL` yoksa veya çalışmıyorsa katalog boş/korumalı durum gösterir.
-- Self-hosted Supabase/Postgres bağlantısı uygulamada `DATABASE_URL` ile kullanılır.
+- Standalone Coolify PostgreSQL bağlantısı uygulamada `DATABASE_URL` ile kullanılır.
 - `REDIS_URL` production’da tanımlanmalı; cache ve rate limiting Coolify Redis servisine bağlanır.
 - `REDIS_URL` yoksa veya Redis erişilemezse uygulama kontrollü şekilde degrade olur; katalog ve admin akışları cache/rate-limit olmadan devam eder.
 - Villa publish aksiyonu server-side doğrulama checklist’ine takılır.

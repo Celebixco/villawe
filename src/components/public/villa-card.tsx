@@ -7,6 +7,7 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { TrustBadges } from "@/components/public/trust-badges";
 import { VillaSelectionControls } from "@/components/public/villa-selection-controls";
 import type { VillaCard as VillaCardType } from "@/features/villas/types";
+import { parseDemoVillaTitle } from "@/lib/demo-villa";
 
 type VillaCardProps = {
   villa: VillaCardType;
@@ -17,9 +18,10 @@ export function VillaCard({ villa }: VillaCardProps) {
     villa.verification.identityVerified &&
     villa.verification.ownershipOrAuthorityVerified &&
     villa.verification.tourismPermitVerified;
+  const { demoBadgeLabel, displayTitle, isDemo } = parseDemoVillaTitle(villa.title);
 
   return (
-    <Card className="villawe-panel overflow-hidden transition duration-300 hover:-translate-y-1 hover:border-primary/18 hover:shadow-[0_28px_70px_-36px_rgba(18,110,130,0.3)]">
+    <Card className="group/card villawe-panel flex h-full flex-col overflow-hidden transition duration-300 hover:-translate-y-1 hover:border-primary/18 hover:shadow-[0_28px_70px_-36px_rgba(18,110,130,0.3)]">
       <div className="relative aspect-[4/3] overflow-hidden">
         <Image
           src={villa.coverImage.url}
@@ -30,8 +32,13 @@ export function VillaCard({ villa }: VillaCardProps) {
         />
         <div className="absolute inset-x-0 bottom-0 h-36 bg-gradient-to-t from-primary-dark/85 via-primary-dark/20 to-transparent" />
         <div className="absolute left-5 top-5 flex flex-wrap gap-2">
+          {isDemo ? (
+            <Badge variant="warning" className="border-white/20 bg-white/16 text-white backdrop-blur-sm">
+              {demoBadgeLabel}
+            </Badge>
+          ) : null}
           {isFullyVerified ? (
-            <Badge variant="success" className="shadow-sm">
+            <Badge variant="success" className="border-white/18 bg-white/12 text-white shadow-sm backdrop-blur-sm">
               <ShieldCheck className="size-3.5" />
               Doğrulanmış Villa
             </Badge>
@@ -55,12 +62,16 @@ export function VillaCard({ villa }: VillaCardProps) {
               <MapPin className="size-3.5" />
               {villa.district.name}, {villa.region.name}
             </p>
-            <h3 className="mt-2 text-3xl font-semibold tracking-tight">{villa.title}</h3>
+            <h3 className="mt-2 max-w-[15ch] text-3xl font-semibold tracking-tight">
+              {displayTitle}
+            </h3>
           </div>
         </div>
       </div>
-      <CardContent className="space-y-4 p-6">
-        <p className="text-sm leading-7 text-muted-foreground">{villa.shortDescription}</p>
+      <CardContent className="flex flex-1 flex-col space-y-4 p-6">
+        <p className="min-h-[5.75rem] text-sm leading-7 text-muted-foreground">
+          {villa.shortDescription}
+        </p>
 
         <div className="grid grid-cols-2 gap-3 rounded-[1.5rem] border border-border/70 bg-muted/70 p-4 text-sm sm:grid-cols-4">
           <div className="space-y-1">
@@ -97,8 +108,8 @@ export function VillaCard({ villa }: VillaCardProps) {
 
         <TrustBadges verification={villa.verification} />
       </CardContent>
-      <CardFooter className="flex items-center justify-between gap-4">
-        <div>
+      <CardFooter className="mt-auto flex items-center justify-between gap-4 border-t border-border/70 px-6 py-5">
+        <div className="space-y-1">
           <p className="text-sm text-muted-foreground">Başlangıç fiyatı</p>
           <p className="text-3xl font-semibold tracking-tight text-primary">
             ₺{villa.pricing.basePrice.toLocaleString("tr-TR")}

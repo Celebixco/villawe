@@ -43,6 +43,14 @@ export function VillaPriceInquiryCard({
               <p className="text-xs text-muted-foreground">Şeffaf fiyat akışı</p>
             </div>
           </div>
+          <div className="flex flex-wrap gap-2 text-xs font-semibold">
+            <span className="rounded-full border border-border/70 bg-muted/72 px-3 py-2 text-primary-dark">
+              Minimum {villa.pricing.minNights} gece
+            </span>
+            <span className="rounded-full border border-border/70 bg-muted/72 px-3 py-2 text-primary-dark">
+              En fazla {villa.maxGuests} misafir
+            </span>
+          </div>
         </div>
 
         <form action={action} className="space-y-4">
@@ -125,7 +133,9 @@ export function VillaPriceInquiryCard({
                       Tahmini Toplam
                     </p>
                     <p className="mt-1 text-xs leading-6 text-muted-foreground">
-                      Tarih seçimine göre ekstra ücretler dahil hesaplanır.
+                      {estimate.nights > 0
+                        ? "Temizlik ve hizmet bedeli dahil tahmini konaklama toplamı."
+                        : "Tarih seçerek toplam konaklama tahminini hemen görün."}
                     </p>
                   </div>
                   <p className="text-3xl font-semibold tracking-tight text-primary">
@@ -133,6 +143,9 @@ export function VillaPriceInquiryCard({
                   </p>
                 </div>
               </div>
+              <p className="pt-1 text-xs leading-6 text-muted-foreground">
+                Depozito, varış öncesi bilgilendirme akışında ayrıca teyit edilir ve toplam tahmine dahil edilmez.
+              </p>
             </div>
           </div>
 
