@@ -21,6 +21,15 @@ const nextConfig: NextConfig = {
     // CI and local validation already run typecheck separately; skip duplicate work in constrained deploy builders.
     ignoreBuildErrors: true,
   },
+  async redirects() {
+    return [
+      {
+        source: "/villalar",
+        destination: "/villa-kiralama",
+        permanent: true,
+      },
+    ];
+  },
   images: {
     formats: ["image/avif", "image/webp"],
     remotePatterns,

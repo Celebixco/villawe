@@ -61,6 +61,14 @@ export function getDatabaseErrorMessage(error: unknown) {
 
   const message = error.message.toLowerCase();
 
+  if (
+    message.includes("eai_again") ||
+    message.includes("enotfound") ||
+    message.includes("getaddrinfo")
+  ) {
+    return "Veritabanı sunucusunun ağ kaydı geçici olarak çözümlenemedi. Sunucu DNS ve ağ durumunu kontrol edip tekrar deneyin.";
+  }
+
   if (message.includes("econnrefused")) {
     return "Veritabanı sunucusuna ulaşılamadı. DATABASE_URL ve ağ erişimini kontrol edin.";
   }
