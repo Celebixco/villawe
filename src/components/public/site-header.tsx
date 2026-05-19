@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Menu, Sparkles } from "lucide-react";
+import { Heart, Menu, Sparkles } from "lucide-react";
 import { usePathname } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
@@ -21,24 +21,24 @@ export function SiteHeader() {
   const pathname = usePathname();
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border/70 bg-background/88 backdrop-blur-xl">
+    <header className="sticky top-0 z-40 border-b border-border/55 bg-background/84 backdrop-blur-xl">
       <div className="container-shell flex h-20 items-center justify-between gap-4">
         <Link href="/" className="flex items-center gap-3">
-          <div className="flex size-11 items-center justify-center rounded-2xl bg-primary text-sm font-semibold text-primary-foreground shadow-[0_16px_32px_-20px_rgba(18,110,130,0.8)]">
+          <div className="flex size-11 items-center justify-center rounded-2xl bg-linear-to-br from-primary via-primary to-secondary text-sm font-semibold text-primary-foreground shadow-[0_16px_32px_-20px_rgba(18,110,130,0.8)]">
             vw
           </div>
           <div className="space-y-0.5">
             <p className="text-xl font-semibold tracking-tight text-primary-dark">villawe</p>
-            <p className="text-xs text-muted-foreground">
-              Güvenilir villa keşfi ve talep platformu
-            </p>
+            <p className="text-xs text-muted-foreground">Doğrulanmış villa keşfi</p>
           </div>
         </Link>
 
-        <nav className="hidden items-center gap-2 lg:flex">
+        <nav className="hidden items-center gap-1 lg:flex">
           {siteConfig.publicNavigation.map((item) => {
+            const pathWithoutHash = item.href.split("#")[0] || "";
             const active =
-              pathname === item.href || pathname.startsWith(`${item.href}/`);
+              pathWithoutHash.length > 1 &&
+              (pathname === pathWithoutHash || pathname.startsWith(`${pathWithoutHash}/`));
 
             return (
               <Link
@@ -57,7 +57,18 @@ export function SiteHeader() {
           })}
         </nav>
 
-        <div className="hidden items-center gap-3 sm:flex">
+        <div className="hidden items-center gap-2 sm:flex">
+          <Link
+            href="/favoriler"
+            aria-label="Favori villalar"
+            className={buttonVariants({
+              variant: "ghost",
+              size: "icon",
+              className: "rounded-full",
+            })}
+          >
+            <Heart className="size-4" />
+          </Link>
           <Link
             href="/admin/login"
             className={buttonVariants({
@@ -68,12 +79,13 @@ export function SiteHeader() {
             Admin Girişi
           </Link>
           <Link
-            href="/villa-kiralama"
+            href="/iletisim#listeleme"
             className={buttonVariants({
+              variant: "accent",
               className: "rounded-full px-6",
             })}
           >
-            Villaları Keşfet
+            Villanızı Listeleyin
           </Link>
         </div>
 
@@ -104,8 +116,10 @@ export function SiteHeader() {
 
             <nav className="flex flex-col gap-2 px-4 pb-4">
               {siteConfig.publicNavigation.map((item) => {
+                const pathWithoutHash = item.href.split("#")[0] || "";
                 const active =
-                  pathname === item.href || pathname.startsWith(`${item.href}/`);
+                  pathWithoutHash.length > 1 &&
+                  (pathname === pathWithoutHash || pathname.startsWith(`${pathWithoutHash}/`));
 
                 return (
                   <Link
@@ -130,6 +144,24 @@ export function SiteHeader() {
                   })}
                 >
                   Villaları Keşfet
+                </Link>
+                <Link
+                  href="/favoriler"
+                  className={buttonVariants({
+                    variant: "outline",
+                    className: "w-full rounded-full",
+                  })}
+                >
+                  Favoriler
+                </Link>
+                <Link
+                  href="/iletisim#listeleme"
+                  className={buttonVariants({
+                    variant: "accent",
+                    className: "w-full rounded-full",
+                  })}
+                >
+                  Villanızı Listeleyin
                 </Link>
                 <Link
                   href="/admin/login"
