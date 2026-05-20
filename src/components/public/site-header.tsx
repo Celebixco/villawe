@@ -26,7 +26,7 @@ export function SiteHeader() {
       <div className="container-shell flex h-20 items-center justify-between gap-4">
         <Link href="/" className="flex items-center">
           <Image
-            src="/images/branding/villawe-wordmark-primary-on-white-crop.png"
+            src="/images/branding/villawe-wordmark-primary-transparent.png"
             alt="Villawe"
             width={790}
             height={220}
@@ -100,7 +100,7 @@ export function SiteHeader() {
             <SheetHeader className="border-b border-border/70 pb-5">
               <SheetTitle>
                 <Image
-                  src="/images/branding/villawe-wordmark-primary-on-white-crop.png"
+                  src="/images/branding/villawe-wordmark-primary-transparent.png"
                   alt="Villawe"
                   width={790}
                   height={220}
