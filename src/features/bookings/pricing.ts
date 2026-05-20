@@ -1,5 +1,7 @@
 import type { VillaDetail } from "@/features/villas/types";
 
+type PricedVilla = Pick<VillaDetail, "pricing" | "maxGuests">;
+
 function toDate(dateString: string) {
   return new Date(`${dateString}T00:00:00.000Z`);
 }
@@ -17,7 +19,7 @@ export function calculateNightCount(startDate?: string, endDate?: string) {
 }
 
 export function resolveNightlyPrice(
-  villa: VillaDetail,
+  villa: PricedVilla,
   startDate?: string,
   endDate?: string,
 ) {
@@ -33,7 +35,7 @@ export function resolveNightlyPrice(
 }
 
 export function calculateVillaEstimate(
-  villa: VillaDetail,
+  villa: PricedVilla,
   startDate?: string,
   endDate?: string,
   guestCount = 1,

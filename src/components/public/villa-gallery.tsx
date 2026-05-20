@@ -34,8 +34,8 @@ export function VillaGallery({ title, items }: VillaGalleryProps) {
 
   return (
     <div className="space-y-4">
-      <div className="relative overflow-hidden rounded-[2.1rem] border border-border/80 bg-card shadow-[0_28px_70px_-42px_rgba(18,110,130,0.24)]">
-        <div className="relative aspect-[16/11] overflow-hidden sm:aspect-[16/10]">
+      <div className="relative overflow-hidden rounded-[2.4rem] border border-border/80 bg-card shadow-[0_34px_90px_-48px_rgba(18,110,130,0.28)]">
+        <div className="relative aspect-[16/10] overflow-hidden sm:aspect-[16/9]">
           <Image
             src={activeItem.url}
             alt={activeItem.alt}
@@ -44,17 +44,10 @@ export function VillaGallery({ title, items }: VillaGalleryProps) {
             className="object-cover"
             sizes="(max-width: 1024px) 100vw, 65vw"
           />
-          <div className="absolute inset-x-0 bottom-0 flex items-center justify-between bg-gradient-to-t from-primary-dark/86 via-primary-dark/14 to-transparent px-5 py-5 text-white">
-            <div>
-              <p className="text-xs uppercase tracking-[0.24em] text-white/72">Galeri</p>
-              <p className="mt-2 text-sm font-medium text-white/84">
-                {media.length} görsel ile villayı keşfedin
-              </p>
-            </div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/16 bg-white/10 px-3 py-2 text-xs font-semibold">
-              <Camera className="size-3.5" />
-              {media.length} fotoğraf
-            </div>
+          <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-primary-dark/76 via-primary-dark/12 to-transparent" />
+          <div className="absolute right-5 bottom-5 inline-flex items-center gap-2 rounded-full border border-white/16 bg-white/12 px-3.5 py-2 text-xs font-semibold text-white shadow-sm backdrop-blur-sm">
+            <Camera className="size-3.5" />
+            {media.length} fotoğraf
           </div>
         </div>
       </div>
@@ -70,7 +63,7 @@ export function VillaGallery({ title, items }: VillaGalleryProps) {
               type="button"
               onClick={() => setActiveId(item.id)}
               className={cn(
-                "relative aspect-[5/4] overflow-hidden rounded-[1.35rem] border border-border/80 bg-card shadow-[0_12px_28px_-24px_rgba(18,110,130,0.24)] transition duration-200",
+                "relative aspect-[5/4] overflow-hidden rounded-[1.45rem] border border-border/80 bg-card shadow-[0_14px_34px_-28px_rgba(18,110,130,0.22)] transition duration-200",
                 isActive ? "ring-2 ring-primary/35" : "hover:-translate-y-0.5 hover:border-primary/20",
               )}
               aria-label={`${title} görselini göster: ${item.alt}`}
