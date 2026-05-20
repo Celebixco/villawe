@@ -1,4 +1,4 @@
-import Image from "next/image";
+import Image, { type StaticImageData } from "next/image";
 import Link from "next/link";
 import type { ComponentProps } from "react";
 import type { LucideIcon } from "lucide-react";
@@ -8,7 +8,7 @@ type VillaConceptCardProps = {
   href: ComponentProps<typeof Link>["href"];
   title: string;
   description: string;
-  imageUrl: string;
+  imageUrl: string | StaticImageData;
   imageAlt: string;
   icon: LucideIcon;
   className?: string;

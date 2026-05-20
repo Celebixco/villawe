@@ -13,13 +13,20 @@ import {
 
 import { VillaConceptCard } from "@/components/public/villa-concept-card";
 import { buttonVariants } from "@/components/ui/button";
+import featuredConceptVilla from "../../../public/images/concepts/featured-concept-villa.webp";
+import honeymoonVilla from "../../../public/images/concepts/honeymoon-villa.webp";
+import nearSeaVilla from "../../../public/images/concepts/near-sea-villa.webp";
+import seaViewVilla from "../../../public/images/concepts/sea-view-villa.webp";
+import natureViewVilla from "../../../public/images/concepts/nature-view-villa.webp";
+import economicVilla from "../../../public/images/concepts/economic-villa.webp";
+import jacuzziVilla from "../../../public/images/concepts/jacuzzi-villa.webp";
 
 const curatedConcepts = [
   {
     slug: "balayi-villalari",
     title: "Balayı Villaları",
     description: "Özel anlar için seçilmiş, mahremiyet ve konfor.",
-    imageUrl: "/images/concepts/honeymoon-villa.webp",
+    imageUrl: honeymoonVilla,
     imageAlt: "Balayı villaları konsepti için gün batımında havuz manzaralı villa",
     icon: Palmtree,
   },
@@ -27,7 +34,7 @@ const curatedConcepts = [
     slug: "denize-yakin-villa",
     title: "Denize Yakın Villa",
     description: "Plaja ve kıyı yaşamına kısa mesafede.",
-    imageUrl: "/images/concepts/near-sea-villa.webp",
+    imageUrl: nearSeaVilla,
     imageAlt: "Denize yakın villa konsepti için havuzlu kıyı villası",
     icon: Waves,
   },
@@ -35,7 +42,7 @@ const curatedConcepts = [
     slug: "deniz-manzarali-villa",
     title: "Deniz Manzaralı Villa",
     description: "Açık ufuk ve panoramik sahil manzarası sunan.",
-    imageUrl: "/images/concepts/sea-view-villa.webp",
+    imageUrl: seaViewVilla,
     imageAlt: "Deniz manzaralı villa konsepti için panoramik havuzlu villa",
     icon: Sunrise,
   },
@@ -43,7 +50,7 @@ const curatedConcepts = [
     slug: "doga-manzarali-villa",
     title: "Doğa Manzaralı Villa",
     description: "Yeşil doku ve sakin manzarayla öne çıkan.",
-    imageUrl: "/images/concepts/nature-view-villa.webp",
+    imageUrl: natureViewVilla,
     imageAlt: "Doğa manzaralı villa konsepti için yeşillikler içindeki yamaç villaları",
     icon: Trees,
   },
@@ -51,7 +58,7 @@ const curatedConcepts = [
     slug: "ekonomik-villa",
     title: "Ekonomik Villa",
     description: "Fiyat dengesini koruyan, kompakt ama konforlu.",
-    imageUrl: "/images/concepts/economic-villa.webp",
+    imageUrl: economicVilla,
     imageAlt: "Ekonomik villa konsepti için kompakt havuzlu villa",
     icon: BadgeDollarSign,
   },
@@ -59,7 +66,7 @@ const curatedConcepts = [
     slug: "jakuzili-villa",
     title: "Jakuzili Villa",
     description: "Konaklamaya spa rahatlığı katan jakuzili.",
-    imageUrl: "/images/concepts/jacuzzi-villa.webp",
+    imageUrl: jacuzziVilla,
     imageAlt: "Jakuzili villa konsepti için spa hissi veren jakuzili oda",
     icon: Sparkles,
   },
@@ -99,7 +106,7 @@ export function VillaConceptsSection() {
             <div className="relative mt-8 overflow-hidden rounded-[2rem]">
               <div className="relative aspect-[4/3] min-h-[18rem]">
                 <Image
-                  src="/images/concepts/featured-concept-villa.webp"
+                  src={featuredConceptVilla}
                   alt="Villa konseptleri için öne çıkan lüks havuzlu villa"
                   fill
                   className="object-cover"
