@@ -2,7 +2,7 @@ import type { LucideIcon } from "lucide-react";
 
 type TrustFeature = {
   label: string;
-  description: string;
+  description?: string;
   icon: LucideIcon;
   accentClassName: string;
 };
@@ -25,9 +25,11 @@ export function TrustFeatureRow({ items }: TrustFeatureRowProps) {
             <div className={`flex size-11 shrink-0 items-center justify-center rounded-2xl bg-card ${item.accentClassName}`}>
               <Icon className="size-5" />
             </div>
-            <div className="space-y-1">
+            <div className={item.description ? "space-y-1" : ""}>
               <p className="text-sm font-semibold text-foreground">{item.label}</p>
-              <p className="text-xs leading-6 text-muted-foreground">{item.description}</p>
+              {item.description ? (
+                <p className="text-xs leading-6 text-muted-foreground">{item.description}</p>
+              ) : null}
             </div>
           </div>
         );

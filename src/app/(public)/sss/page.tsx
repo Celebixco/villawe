@@ -15,8 +15,8 @@ export default function FaqPage() {
       <section className="villawe-section-band villawe-gradient-band space-y-6">
         <SectionHeading
           kicker="Sık Sorulan Sorular"
-          title="Sık sorulan sorular"
-          description="Doğrulama, fiyatlama ve rezervasyon talep akışıyla ilgili temel sorular."
+          title="Kısa yanıtlarla SSS"
+          description="Villawe deneyimine dair en temel sorular."
         />
       </section>
 

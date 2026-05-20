@@ -32,7 +32,7 @@ export function FilterDrawer({ children }: FilterDrawerProps) {
         <SheetHeader className="border-b border-border/70 pb-4">
           <SheetTitle>Filtreler</SheetTitle>
           <SheetDescription>
-            Bölge, fiyat ve öne çıkan özelliklere göre villa seçkisini daraltın.
+            Size uygun villaları birkaç adımda daraltın.
           </SheetDescription>
         </SheetHeader>
         <div className="max-h-[calc(88vh-7rem)] overflow-y-auto py-4">{children}</div>

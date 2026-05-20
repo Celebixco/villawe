@@ -14,7 +14,7 @@ export function SimilarVillas({ villas }: SimilarVillasProps) {
     <div className="space-y-6">
       <div className="space-y-2">
         <p className="section-kicker">Benzer Seçenekler</p>
-        <h2 className="text-4xl font-semibold tracking-tight">Bunlar da ilginizi çekebilir</h2>
+        <h2 className="text-4xl font-semibold tracking-tight">Benzer villalar</h2>
       </div>
       <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
         {villas.map((villa) => (

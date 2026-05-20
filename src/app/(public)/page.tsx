@@ -1,9 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
+import type { Route } from "next";
 import {
   ArrowRight,
   BadgeDollarSign,
-  BadgePercent,
   Headset,
   ShieldCheck,
   Sparkles,
@@ -13,7 +13,6 @@ import { BlogGuideCard } from "@/components/public/blog-guide-card";
 import { EmptyState } from "@/components/public/empty-state";
 import { HeroSearchBox } from "@/components/public/hero-search-box";
 import { RegionCard } from "@/components/public/region-card";
-import { SafeRentalAlert } from "@/components/public/safe-rental-alert";
 import { SectionHeading } from "@/components/public/section-heading";
 import { TrustFeatureRow } from "@/components/public/trust-feature-row";
 import { VillaCard } from "@/components/public/villa-card";
@@ -24,14 +23,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { buildMetadata } from "@/features/seo/metadata";
 import { getHomePageData } from "@/features/villas/queries";
 import { getDatabaseHealth } from "@/lib/db/prisma";
-import { parseDemoVillaTitle } from "@/lib/demo-villa";
+import { getPublicVillaCopy } from "@/lib/demo-villa";
 
 export const dynamic = "force-dynamic";
 
 export const metadata = buildMetadata({
-  title: "Villawe | Güvenilir ve doğrulanmış villaları keşfedin",
+  title: "Villawe | Seçkin villaları güvenle keşfedin",
   description:
-    "Doğrulanmış villa ilanları, şeffaf fiyat kalemleri ve güvenli rezervasyon talep akışıyla Villawe ana sayfası.",
+    "Doğrulanmış villalar, net fiyat bilgisi ve sade talep akışıyla Villawe ana sayfası.",
   path: "/",
 });
 
@@ -75,43 +74,62 @@ export default async function HomePage() {
   );
   const heroImage = spotlightVilla?.coverImage.url || "/images/villawe/villa-luna.svg";
   const heroImageAlt = spotlightVilla?.coverImage.alt || "Villawe öne çıkan villa";
-  const spotlightTitle = parseDemoVillaTitle(
-    spotlightVilla?.title || "Akdeniz esintili premium konaklama",
-  );
+  const spotlightContent = spotlightVilla ? getPublicVillaCopy(spotlightVilla) : null;
 
   const trustItems = [
     {
-      label: "%100 Güvenli",
-      description: "Doğrulama alanları gerçek kayıtlarla yönetilir.",
+      label: "Doğrulanmış Villalar",
+      description: "Özenle seçilmiş",
       icon: ShieldCheck,
       accentClassName: "text-success",
     },
     {
-      label: "Şeffaf Fiyatlandırma",
-      description: "Temizlik, hizmet ve depozito kalemleri görünürdür.",
+      label: "Net Fiyat",
+      description: "Sürprizsiz görünüm",
       icon: BadgeDollarSign,
       accentClassName: "text-primary",
     },
     {
-      label: "7/24 Destek",
-      description: "Talep akışı boyunca operasyonel destek sağlanır.",
-      icon: Headset,
-      accentClassName: "text-secondary",
+      label: "Güvenli Talep",
+      description: "Resmi akış",
+      icon: Sparkles,
+      accentClassName: "text-accent",
     },
     {
-      label: "En İyi Fiyat Garantisi",
-      description: "Kullanıcıyı yanıltmayan net fiyat dili hedeflenir.",
-      icon: BadgePercent,
-      accentClassName: "text-accent",
+      label: "Destek",
+      description: "Hızlı geri dönüş",
+      icon: Headset,
+      accentClassName: "text-secondary",
     },
   ];
 
   const curatedRegions = data.regions.slice(0, 5);
   const featuredVillas = (data.featured.length ? data.featured : data.verified.length ? data.verified : data.villas).slice(0, 5);
-  const featuredVillaSlugs = new Set(featuredVillas.map((villa) => villa.slug));
-  const newestVillas = (data.newest.length ? data.newest : data.villas)
-    .filter((villa) => !featuredVillaSlugs.has(villa.slug))
-    .slice(0, 3);
+  const guideFallbackCards: Array<{
+    href: Route;
+    kicker: string;
+    title: string;
+    body: string;
+  }> = [
+    {
+      href: "/guvenli-villa-kiralama-rehberi",
+      kicker: "Güvenli Kiralama",
+      title: "Villa seçerken dikkat etmeniz gerekenler",
+      body: "Talep öncesi kontrol etmeniz gereken temel başlıkları bir araya getirdik.",
+    },
+    {
+      href: "/iptal-ve-depozito-politikasi",
+      kicker: "Fiyat ve Koşullar",
+      title: "Depozito ve iptal bilgilerini net görün",
+      body: "Ücret kalemlerini ve iade koşullarını sade biçimde inceleyin.",
+    },
+    {
+      href: "/sss",
+      kicker: "SSS",
+      title: "Sık sorulan sorulara hızlı bakış",
+      body: "Villawe akışına dair en temel soruları kısa yanıtlarla görün.",
+    },
+  ];
 
   return (
     <div className="pb-18">
@@ -119,17 +137,12 @@ export default async function HomePage() {
         <div className="grid gap-8 lg:grid-cols-[1.02fr_0.98fr] lg:items-center">
           <div className="space-y-8">
             <div className="space-y-5">
-              <Badge variant="info" className="rounded-full px-4 py-2">
-                Fresh Holiday Premium
-              </Badge>
               <div className="space-y-4">
                 <h1 className="max-w-4xl text-5xl font-semibold tracking-tight text-balance text-foreground sm:text-6xl xl:text-7xl">
-                  Hayalinizdeki villayı keşfedin
+                  Seçkin villaları güvenle keşfedin
                 </h1>
                 <p className="max-w-2xl text-lg leading-8 text-muted-foreground">
-                  Güvenilir, doğrulanmış ve size özel villalar sizi bekliyor. Villawe;
-                  sahte ilan riskini azaltan, fiyatı şeffaf gösteren ve talep akışını
-                  güvenle yöneten premium villa keşif platformudur.
+                  Doğrulanmış villalar, net fiyat bilgisi ve sade talep akışı Villawe’de.
                 </p>
               </div>
               <div className="flex flex-wrap gap-3">
@@ -171,12 +184,12 @@ export default async function HomePage() {
                 <div className="absolute inset-0 bg-gradient-to-t from-primary-dark/88 via-primary-dark/18 to-transparent" />
                 <div className="absolute inset-x-0 bottom-0 space-y-4 p-6 text-white sm:p-7">
                   <div className="flex flex-wrap gap-2">
-                    {spotlightTitle.isDemo ? (
+                    {spotlightContent?.isDemo ? (
                       <Badge
                         variant="warning"
                         className="border-white/16 bg-white/10 text-white"
                       >
-                        {spotlightTitle.demoBadgeLabel}
+                        {spotlightContent.demoBadgeLabel}
                       </Badge>
                     ) : null}
                     {spotlightVerified ? (
@@ -184,20 +197,20 @@ export default async function HomePage() {
                         variant="success"
                         className="border-white/16 bg-white/10 text-white"
                       >
-                        Doğrulanmış Villa
+                        Doğrulanmış
                       </Badge>
                     ) : null}
                     <Badge variant="secondary" className="border-white/16 bg-white/10 text-white">
-                      Şeffaf Fiyatlandırma
+                      Net fiyat
                     </Badge>
                   </div>
                   <div className="space-y-2">
                     <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-                      {spotlightTitle.displayTitle}
+                      {spotlightContent?.displayTitle || "Akdeniz esintili konaklama"}
                     </h2>
                     <p className="max-w-md text-sm leading-7 text-white/80">
-                      {spotlightVilla?.shortDescription ||
-                        "Yüksek kaliteli villa seçkisi, güçlü doğrulama mantığı ve güven veren bir talep deneyimi."}
+                      {spotlightContent?.shortDescription ||
+                        "Özenle seçilmiş villalarla sade ve güvenli bir tatil planı oluşturun."}
                     </p>
                   </div>
                   {spotlightVilla ? (
@@ -210,22 +223,9 @@ export default async function HomePage() {
                       </span>
                     </div>
                   ) : null}
-                  <div className="flex flex-wrap gap-2 text-xs font-medium text-white/86">
-                    <span className="rounded-full border border-white/16 bg-white/10 px-3 py-2">
-                      Geniş villa galerileri
-                    </span>
-                    <span className="rounded-full border border-white/16 bg-white/10 px-3 py-2">
-                      Belge ve konum kontrolü
-                    </span>
-                    <span className="rounded-full border border-white/16 bg-white/10 px-3 py-2">
-                      Kullanıcıyı koruyan talep akışı
-                    </span>
-                  </div>
                 </div>
               </div>
             </div>
-
-            <SafeRentalAlert />
           </div>
         </div>
       </section>
@@ -238,8 +238,8 @@ export default async function HomePage() {
         <section className="container-shell pt-6">
           <DataSourceNotice
             tone="warning"
-            title="Demo katalog görünümü"
-            body={`${databaseHealth.message} Development ortamında görünen villalar örnek içeriktir ve gerçek stok olarak değerlendirilmemelidir.`}
+            title="Örnek katalog görünümü"
+            body="Bu görünüm geçici örnek içerikler içerebilir."
           />
         </section>
       ) : null}
@@ -249,7 +249,7 @@ export default async function HomePage() {
           <DataSourceNotice
             tone="error"
             title="Villa kataloğu şu anda kullanılamıyor"
-            body="Villawe production ortamında demo ilan göstermez. Lütfen biraz sonra tekrar deneyin veya ekibimizle iletişime geçin."
+            body="Lütfen biraz sonra tekrar deneyin veya ekibimizle iletişime geçin."
           />
         </section>
       ) : null}
@@ -258,8 +258,7 @@ export default async function HomePage() {
         <div className="villawe-section-band villawe-gradient-band space-y-8">
           <SectionHeading
             kicker="Popüler Bölgeler"
-            title="Tatili bulunduğu yer kadar hissettiren destinasyonlar"
-            description="Kaş’tan Sapanca’ya, Villawe bölge sayfaları güvenli arama deneyimini lokasyon bağlamıyla birleştirir."
+            title="Popüler bölgeler"
           />
 
           <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-5">
@@ -289,12 +288,8 @@ export default async function HomePage() {
               <div className="space-y-3">
                 <p className="section-kicker">Villa Konseptleri</p>
                 <h2 className="text-4xl font-semibold tracking-tight text-primary-dark">
-                  Balayı, jakuzi, muhafazakar ya da deniz manzaralı
+                  Tatil tarzınıza göre seçin
                 </h2>
-                <p className="villawe-rich-copy">
-                  Kullanıcılar sadece lokasyona değil, tatil ihtiyacına göre de arama
-                  yapar. Villawe konsept sayfaları tam olarak bu davranış için tasarlandı.
-                </p>
               </div>
               <Link
                 href="/villa-kiralama"
@@ -322,7 +317,7 @@ export default async function HomePage() {
                   <h3 className="text-2xl font-semibold tracking-tight text-foreground">
                     {concept.name}
                   </h3>
-                  <p className="text-sm leading-7 text-muted-foreground">
+                  <p className="line-clamp-2 text-sm leading-7 text-muted-foreground">
                     {concept.description}
                   </p>
                 </div>
@@ -335,8 +330,8 @@ export default async function HomePage() {
       <section className="container-shell py-12">
         <SectionHeading
           kicker="Öne Çıkan Villalar"
-          title="Güven rozetleri ve temiz fiyat diliyle seçilmiş villalar"
-          description="Kapsamlı fotoğraf, net bölge bilgisi ve temel ücret kalemlerini görünür tutan kart yapısıyla hızlı karşılaştırma yapın."
+          title="Öne çıkan villalar"
+          description="Popüler bölgelerde seçilmiş villa alternatifleri."
           action={
             <Link
               href="/villa-kiralama"
@@ -359,111 +354,52 @@ export default async function HomePage() {
         ) : (
           <div className="mt-8">
             <EmptyState
-              title="Öne çıkan villa seçkisi hazırlanıyor"
-              description="Yayınlanmış villalar eklendiğinde bu alanda editöryal olarak öne çıkarılan seçenekleri göreceksiniz."
+              title="Seçki kısa süre içinde güncellenecek"
+              description="Yayınlanan villalar arasından öne çıkan alternatifleri burada görebilirsiniz."
             />
           </div>
         )}
       </section>
 
       <section className="container-shell py-12">
-        <div className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
-          <Card className="villawe-panel overflow-hidden">
-            <CardContent className="space-y-5 p-7 sm:p-8">
-              <p className="section-kicker">Villawe Güvenli Kiralama Sistemi</p>
-              <h2 className="text-4xl font-semibold tracking-tight text-primary-dark">
-                Platform dışı ödeme yapmayın!
-              </h2>
-              <div className="space-y-3 villawe-rich-copy">
-                <p>
-                  Villawe her ilanı tek bir pazarlama rozetiyle süslemez. Hangi doğrulama
-                  kaleminin tamamlandığı, hangisinin beklediği net biçimde ayrılır.
-                </p>
-                <p>
-                  Böylece kullanıcı eksik bir kontrolü tamamlanmış sanmaz; fiyat özetini,
-                  depozito politikasını ve güvenlik uyarılarını karar anında açıkça görür.
-                </p>
-              </div>
-              <div className="flex flex-wrap gap-3">
-                <Link
-                  href="/guvenli-villa-kiralama-rehberi"
-                  className={buttonVariants({
-                    variant: "outline",
-                    className: "rounded-full",
-                  })}
-                >
-                  Rehberi Oku
-                </Link>
-                <Link
-                  href="/iletisim"
-                  className={buttonVariants({
-                    variant: "accent",
-                    className: "rounded-full",
-                  })}
-                >
-                  Güvenlik Bildirimi Yap
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
-
-          <div className="grid gap-5">
-            <Card className="villawe-soft-panel">
-              <CardContent className="space-y-3 p-6">
-                <p className="section-kicker">Şeffaflık</p>
-                <h3 className="text-3xl font-semibold tracking-tight">Temizlik, hizmet ve depozito ayrı görünür</h3>
-                <p className="text-sm leading-7 text-muted-foreground">
-                  Kullanıcıyı sürpriz ücretlerle karşılaştırmayan fiyat yapısı, Villawe
-                  marka güveninin merkezindedir.
-                </p>
-              </CardContent>
-            </Card>
-            <Card className="overflow-hidden rounded-[2rem] border border-primary/10 bg-linear-to-br from-primary via-primary to-primary-dark text-primary-foreground shadow-[0_24px_60px_-36px_rgba(18,110,130,0.72)]">
-              <CardContent className="space-y-4 p-6">
-                <p className="section-kicker text-white/72">Listeleme Ortağı Olun</p>
-                <h3 className="text-3xl font-semibold tracking-tight">
-                  Villanızı Villawe’de güven odaklı biçimde yayınlayın
-                </h3>
-                <p className="text-sm leading-7 text-primary-foreground/82">
-                  Doküman yükleme, doğrulama, fiyat sezonu ve müsaitlik yönetimi tek
-                  operasyon akışında buluşur.
-                </p>
-                <Link
-                  href="/iletisim#listeleme"
-                  className={buttonVariants({
-                    variant: "accent",
-                    className: "rounded-full",
-                  })}
-                >
-                  Listeleme Talebi Gönder
-                </Link>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      <section className="container-shell py-12">
-        <SectionHeading
-          kicker="Yeni Eklenenler"
-          title="Son eklenen ve ilham veren villa seçkisi"
-          description="Keşif akışını canlı tutmak için yeni yayınlanan villaları ayrı bir seçki halinde sunuyoruz."
-        />
-
-        {!inventoryUnavailable && newestVillas.length ? (
-          <div className="mt-8 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-            {newestVillas.map((villa) => (
-              <VillaCard key={villa.id} villa={villa} />
-            ))}
-          </div>
-        ) : null}
+        <Card className="villawe-panel overflow-hidden">
+          <CardContent className="space-y-5 p-7 sm:p-8">
+            <p className="section-kicker">Villawe Güvenli Talep Sistemi</p>
+            <h2 className="text-4xl font-semibold tracking-tight text-primary-dark">
+              Net fiyat, güvenli talep
+            </h2>
+            <p className="max-w-3xl text-base leading-8 text-muted-foreground">
+              Ödeme ve depozito detayları talep öncesinde açıkça gösterilir. Platform dışı ödeme taleplerini kabul etmeyin.
+            </p>
+            <div className="flex flex-wrap gap-3">
+              <Link
+                href="/guvenli-villa-kiralama-rehberi"
+                className={buttonVariants({
+                  variant: "outline",
+                  className: "rounded-full",
+                })}
+              >
+                Rehberi Oku
+              </Link>
+              <Link
+                href="/iletisim"
+                className={buttonVariants({
+                  variant: "accent",
+                  className: "rounded-full",
+                })}
+              >
+                Güvenlik Bildirimi Yap
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
       </section>
 
       <section className="container-shell py-12">
         <SectionHeading
           kicker="Gezi Rehberi"
-          title="Tatil planını kolaylaştıran içerikler"
-          description="Bölge rehberleri, güvenli kiralama notları ve Villawe’nin güven yaklaşımını anlatan içerik merkezi."
+          title="Tatil planını kolaylaştıran rehberler"
+          description="Karar anını kolaylaştıran kısa ve net içerikler."
           action={
             <Link
               href="/blog"
@@ -481,12 +417,21 @@ export default async function HomePage() {
           {data.blogPosts.length ? (
             data.blogPosts.map((post) => <BlogGuideCard key={post.slug} post={post} />)
           ) : (
-            <div className="lg:col-span-3">
-              <EmptyState
-                title="İlk rehber içerikleri hazırlanıyor"
-                description="Blog yazıları yayınlandığında burada editöryal rehber kartlarını göreceksiniz."
-              />
-            </div>
+            guideFallbackCards.map((card) => (
+              <Link
+                key={card.href}
+                href={card.href}
+                className="villawe-soft-panel block rounded-[2rem] p-6 transition duration-300 hover:-translate-y-1 hover:border-primary/18 hover:shadow-[0_24px_60px_-36px_rgba(18,110,130,0.24)]"
+              >
+                <div className="space-y-3">
+                  <p className="section-kicker">{card.kicker}</p>
+                  <h3 className="text-2xl font-semibold tracking-tight text-foreground">
+                    {card.title}
+                  </h3>
+                  <p className="text-sm leading-7 text-muted-foreground">{card.body}</p>
+                </div>
+              </Link>
+            ))
           )}
         </div>
       </section>
@@ -494,13 +439,11 @@ export default async function HomePage() {
       <section className="container-shell py-12">
         <div className="rounded-[2.5rem] border border-border/70 bg-card px-6 py-8 shadow-[0_26px_70px_-40px_rgba(18,110,130,0.2)] sm:px-8 sm:py-10 lg:flex lg:items-center lg:justify-between lg:gap-8">
           <div className="space-y-3">
-            <p className="section-kicker">Son Çağrı</p>
             <h2 className="text-4xl font-semibold tracking-tight text-primary-dark">
-              Tatil planınızı güvenle başlatın
+              Tatilinizi sade ve güvenle planlayın
             </h2>
             <p className="max-w-2xl text-base leading-8 text-muted-foreground">
-              Villawe ile doğrulama sürecinden geçmiş villaları keşfedin, fiyatı açıkça görün
-              ve talebinizi güvenli akışla iletin.
+              Doğrulanmış villa seçkisini inceleyin ve size uygun evi birkaç adımda bulun.
             </p>
           </div>
           <div className="mt-6 flex flex-wrap gap-3 lg:mt-0 lg:justify-end">

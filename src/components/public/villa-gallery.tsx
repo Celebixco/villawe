@@ -46,9 +46,9 @@ export function VillaGallery({ title, items }: VillaGalleryProps) {
           />
           <div className="absolute inset-x-0 bottom-0 flex items-center justify-between bg-gradient-to-t from-primary-dark/86 via-primary-dark/14 to-transparent px-5 py-5 text-white">
             <div>
-              <p className="text-xs uppercase tracking-[0.24em] text-white/72">Fotoğraf Galerisi</p>
+              <p className="text-xs uppercase tracking-[0.24em] text-white/72">Galeri</p>
               <p className="mt-2 text-sm font-medium text-white/84">
-                {media.length} görsel ile villa atmosferini inceleyin
+                {media.length} görsel ile villayı keşfedin
               </p>
             </div>
             <div className="inline-flex items-center gap-2 rounded-full border border-white/16 bg-white/10 px-3 py-2 text-xs font-semibold">

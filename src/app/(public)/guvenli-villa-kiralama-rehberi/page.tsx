@@ -6,7 +6,7 @@ import { buildMetadata } from "@/features/seo/metadata";
 export const metadata = buildMetadata({
   title: "Güvenli Villa Kiralama Rehberi | Villawe",
   description:
-    "Sahte ilan ve platform dışı ödeme risklerini azaltmak için güvenli villa kiralama rehberi.",
+    "Villa seçerken dikkat edilmesi gereken temel güven adımlarını özetleyen rehber.",
   path: "/guvenli-villa-kiralama-rehberi",
 });
 
@@ -17,20 +17,30 @@ export default function SafeGuidePage() {
         <SectionHeading
           kicker="Güvenli Kiralama Rehberi"
           title="Güvenli villa kiralama rehberi"
-          description="Kullanıcıyı önce koruyan, sonra dönüştüren bir kiralama akışı için temel kontrol listemiz."
+          description="Tatil planı yaparken bakmanız gereken temel başlıklar."
         />
       </section>
 
       <div className="grid gap-6 lg:grid-cols-3">
         {[
-          "İlan yetkisi ve kimlik doğrulaması tamamlandı mı?",
-          "Temizlik, hizmet ve depozito kalemleri rezervasyon öncesinde açık mı?",
-          "Platform dışı ödeme veya acele kapora baskısı var mı?",
-        ].map((item, index) => (
-          <Card key={item} className="villawe-panel">
+          {
+            title: "Yetki ve iletişim",
+            body: "Villa bilgileri, iletişim akışı ve talep süreci açıkça gösterilmelidir.",
+          },
+          {
+            title: "Net fiyat",
+            body: "Temizlik, hizmet ve depozito gibi kalemler talep öncesinde görünür olmalıdır.",
+          },
+          {
+            title: "Ödeme güvenliği",
+            body: "Resmi akış dışına çıkan ödeme taleplerinde işlemi durdurun ve teyit isteyin.",
+          },
+        ].map((item) => (
+          <Card key={item.title} className="villawe-panel">
             <CardContent className="space-y-3 p-7">
-              <p className="section-kicker">Kontrol {index + 1}</p>
-              <p className="text-lg font-semibold tracking-tight">{item}</p>
+              <p className="section-kicker">Kontrol</p>
+              <p className="text-lg font-semibold tracking-tight">{item.title}</p>
+              <p className="text-sm leading-7 text-muted-foreground">{item.body}</p>
             </CardContent>
           </Card>
         ))}

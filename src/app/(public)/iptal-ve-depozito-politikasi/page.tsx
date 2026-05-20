@@ -4,7 +4,7 @@ import { buildMetadata } from "@/features/seo/metadata";
 
 export const metadata = buildMetadata({
   title: "İptal ve Depozito Politikası | Villawe",
-  description: "Villawe iptal ve depozito politikası altyapısı.",
+  description: "İptal ve depozito süreçlerine dair kısa ve net özet.",
   path: "/iptal-ve-depozito-politikasi",
 });
 
@@ -14,16 +14,16 @@ export default function CancellationPolicyPage() {
       <section className="villawe-section-band villawe-gradient-band space-y-6">
         <SectionHeading
           kicker="İptal ve Depozito"
-          title="İptal ve depozito politikası"
-          description="Villawe, kullanıcıya ücret kalemlerini ve iade koşullarını rezervasyon talebinden önce görünür kılar."
+          title="İptal ve depozito"
+          description="Talep öncesinde görmeniz gereken temel koşullar."
         />
       </section>
 
       <div className="grid gap-6 lg:grid-cols-3">
         {[
-          "İptal politikası villa bazında değişebilir ancak özet alanı daima kullanıcıya açık gösterilir.",
-          "Depozito koşulları, hasar iadesi süresi ve tahsil yöntemi ayrı alanlar halinde saklanır.",
-          "Hiçbir ilan depozito veya hizmet bedelini gizleyerek talep toplamaz.",
+          "İptal koşulları villa bazında değişebilir; temel özet her zaman talep öncesinde görünür.",
+          "Depozito tutarı ve iade çerçevesi rezervasyon kararı öncesinde açıkça paylaşılır.",
+          "Ek ücretler gizlenmeden gösterilir; toplam maliyet daha ilk adımda netleşir.",
         ].map((item) => (
           <Card key={item} className="villawe-panel">
             <CardContent className="p-7 text-sm leading-7 text-muted-foreground">

@@ -14,7 +14,7 @@ export const dynamic = "force-dynamic";
 
 export const metadata = buildMetadata({
   title: "Blog | Villawe",
-  description: "Villawe gezi rehberi ve güven odaklı içerik merkezi.",
+  description: "Villawe rehberi, bölge notları ve güvenli tatil planı için editoryal içerikler.",
   path: "/blog",
 });
 
@@ -32,8 +32,8 @@ export default async function BlogIndexPage() {
       <section className="villawe-section-band villawe-gradient-band space-y-6">
         <SectionHeading
           kicker="Seyahat Rehberi"
-          title="Villawe blog"
-          description="Bölge rehberleri, güvenli kiralama notları ve tatil planını kolaylaştıran açık içerikler."
+          title="Villawe rehberi"
+          description="Bölge notları ve güvenli tatil planı için kısa içerikler."
           action={
             <Link
               href="/villa-kiralama"
@@ -51,8 +51,8 @@ export default async function BlogIndexPage() {
       {databaseHealth.status === "demo" ? (
         <DataSourceNotice
           tone="warning"
-          title="Demo içerik akışı"
-          body={`${databaseHealth.message} Blog listesi development ortamındaki örnek içeriklerle gösteriliyor.`}
+          title="Örnek içerik akışı"
+          body="Rehber sayfası geçici örnek içerikler gösterebilir."
         />
       ) : null}
 
@@ -63,19 +63,18 @@ export default async function BlogIndexPage() {
             <CardContent className="space-y-4 p-7">
               <p className="section-kicker">Editör Notu</p>
               <h2 className="text-3xl font-semibold tracking-tight">
-                Tatil planı kadar güvenli karar akışına da odaklanıyoruz
+                Tatil planını kolaylaştıran kısa notlar
               </h2>
               <p className="text-sm leading-8 text-muted-foreground">
-                Villawe rehberi yalnızca destinasyon ilhamı üretmez; kapora, doğrulama ve
-                fiyat şeffaflığı gibi karar anında kritik olan konuları da ele alır.
+                Villawe rehberi; bölge seçimi, fiyat netliği ve talep süreci gibi karar anını etkileyen başlıklara odaklanır.
               </p>
             </CardContent>
           </Card>
         </div>
       ) : (
         <EmptyState
-          title="Blog içerikleri yakında yayında"
-          description="İlk gezi rehberleri ve güvenli kiralama yazıları eklendiğinde burada görünecek."
+          title="Rehber seçkisi kısa süre içinde genişleyecek"
+          description="Yeni yazılar eklendikçe bu alanda görünmeye devam edecek."
         />
       )}
 
@@ -84,7 +83,7 @@ export default async function BlogIndexPage() {
           <SectionHeading
             kicker="Son Yazılar"
             title="Okumaya devam edin"
-            description="Bölge ipuçları, villa seçimi ve güvenli talep sürecine dair diğer içerikler."
+            description="Bölge seçiminden talep sürecine kadar diğer içerikler."
           />
           <div className="grid gap-6 lg:grid-cols-3">
             {secondaryPosts.map((post) => (

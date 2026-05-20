@@ -21,7 +21,7 @@ const monoFont = IBM_Plex_Mono({
 export const metadata: Metadata = buildMetadata({
   title: "Villawe",
   description:
-    "Villawe, doğrulanmış villa ilanları ve şeffaf rezervasyon talepleri için güven odaklı premium villa kiralama platformudur.",
+    "Doğrulanmış villalar, net fiyatlar ve güvenli talep akışı Villawe'de buluşur.",
   path: "/",
 });
 
