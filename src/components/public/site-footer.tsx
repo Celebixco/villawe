@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Mail, PhoneCall } from "lucide-react";
 
@@ -11,7 +12,13 @@ export function SiteFooter() {
         <div className="rounded-[2.5rem] border border-primary-dark/12 bg-primary-dark text-white shadow-[0_30px_70px_-36px_rgba(11,77,91,0.75)]">
           <div className="grid gap-10 px-6 py-10 sm:px-8 lg:grid-cols-[1.2fr_0.9fr_0.8fr_0.9fr] lg:px-10 lg:py-12">
             <div className="space-y-4">
-              <p className="text-2xl font-semibold tracking-tight">villawe</p>
+              <Image
+                src="/images/branding/villawe-wordmark-white.png"
+                alt="Villawe"
+                width={705}
+                height={210}
+                className="h-auto w-[140px] sm:w-[168px]"
+              />
               <p className="max-w-md text-sm leading-7 text-white/74">
                 Doğrulanmış villalar, net fiyatlar ve güvenli talep akışı.
               </p>
