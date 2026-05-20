@@ -3,15 +3,15 @@ export const siteConfig = {
   domain: "villawe.com",
   url: process.env.NEXT_PUBLIC_SITE_URL || "https://villawe.com",
   description:
-    "Villawe, doğrulanmış ve şeffaf villa kiralama deneyimi için güven odaklı premium keşif ve rezervasyon talep platformudur.",
+    "Doğrulanmış villalar, net fiyatlar ve güvenli talep akışı Villawe'de buluşur.",
   defaultLocale: "tr-TR",
   socialImage: "/images/villawe/og-default.svg",
   publicNavigation: [
     { href: "/villa-kiralama", label: "Villalar" },
     { href: "/#bolgeler", label: "Bölgeler" },
-    { href: "/#konseptler", label: "Villa Konseptleri" },
+    { href: "/#konseptler", label: "Konseptler" },
     { href: "/blog", label: "Rehber" },
-    { href: "/hakkimizda", label: "Hakkımızda" },
+    { href: "/iletisim", label: "İletişim" },
   ],
   adminNavigation: [
     { href: "/admin", label: "Genel Bakış" },

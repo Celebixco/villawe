@@ -18,8 +18,8 @@ export default function ContactPage() {
       <section className="villawe-section-band villawe-gradient-band space-y-6">
         <SectionHeading
           kicker="İletişim"
-          title="Bize güvenle yazın"
-          description="İlan güvenliği, villa listeleme talebi veya operasyonel destek için bizimle iletişime geçebilirsiniz."
+          title="Bize yazın"
+          description="Villa listeleme, rezervasyon talebi veya güvenlik bildirimi için bize yazın."
         />
       </section>
 
@@ -27,14 +27,14 @@ export default function ContactPage() {
         <Card className="villawe-panel" id="listeleme">
           <CardContent className="space-y-4 p-7">
             <div className="space-y-2">
-              <p className="section-kicker">Listeleme / Destek</p>
+              <p className="section-kicker">İletişim Formu</p>
               <h2 className="text-3xl font-semibold tracking-tight">Mesaj bırakın</h2>
             </div>
             <Input placeholder="Ad Soyad" />
             <Input type="email" placeholder="E-posta" />
             <Textarea rows={7} placeholder="Mesajınız" />
             <p className="text-sm text-muted-foreground">
-              Form altyapısı hazırdır; üretim ortamında CRM veya destek akışına bağlanabilir.
+              Ekibimiz en kısa sürede dönüş yapar.
             </p>
           </CardContent>
         </Card>
@@ -47,8 +47,7 @@ export default function ContactPage() {
               </div>
               <h2 className="text-3xl font-semibold tracking-tight">Güvenlik bildirimi</h2>
               <p className="text-sm leading-7 text-primary-foreground/80">
-                Platform dışı ödeme talebi, sahte ekran görüntüsü veya şüpheli depozito yönlendirmesi alırsanız
-                hemen bize bildirin.
+                Şüpheli ödeme talebi veya güven vermeyen bir yönlendirme görürseniz hemen bize bildirin.
               </p>
             </CardContent>
           </Card>

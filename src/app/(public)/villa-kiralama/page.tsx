@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Compass, SlidersHorizontal } from "lucide-react";
+import { Compass } from "lucide-react";
 
 import { EmptyState } from "@/components/public/empty-state";
 import { FilterDrawer } from "@/components/public/filter-drawer";
@@ -8,7 +8,6 @@ import { SectionHeading } from "@/components/public/section-heading";
 import { VillaCard } from "@/components/public/villa-card";
 import { DataSourceNotice } from "@/components/shared/data-source-notice";
 import { buttonVariants } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { buildMetadata } from "@/features/seo/metadata";
 import { listingBooleanFilters } from "@/features/search/filters";
 import {
@@ -24,7 +23,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = buildMetadata({
   title: "Villa Kiralama | Villawe",
   description:
-    "Bölge, misafir ve fiyat filtreleriyle doğrulanmış villa ilanlarını listeleyin.",
+    "Bölge, misafir ve fiyat filtreleriyle seçkin villa alternatiflerini keşfedin.",
   path: "/villa-kiralama",
 });
 
@@ -219,17 +218,14 @@ export default async function VillaListingPage({
       <section className="villawe-section-band villawe-gradient-band space-y-6">
         <SectionHeading
           kicker="Villa Arama"
-          title="Doğrulanmış villaları tatil planınıza göre filtreleyin"
-          description="Bölge, tarih, kapasite ve öne çıkan özellikleri bir araya getirip size uygun seçkiyi rahatça daraltın."
+          title="Seçkin villaları filtreleyin"
+          description="Bölge, tarih ve temel özelliklere göre size uygun seçenekleri daraltın."
         />
 
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-[1.7rem] border border-border/70 bg-card/78 px-4 py-4 shadow-[0_18px_48px_-34px_rgba(18,110,130,0.18)]">
           <div>
             <p className="text-sm font-semibold text-foreground">
               {inventoryUnavailable ? "Katalog kullanılamıyor" : `${villas.length} villa bulundu`}
-            </p>
-            <p className="text-sm leading-7 text-muted-foreground">
-              Filtreleriniz her zaman şeffaf fiyat ve gerçek doğrulama mantığıyla eşleşir.
             </p>
           </div>
           <FilterDrawer>
@@ -247,8 +243,8 @@ export default async function VillaListingPage({
       {databaseHealth.status === "demo" ? (
         <DataSourceNotice
           tone="warning"
-          title="Demo katalog filtreleniyor"
-          body={`${databaseHealth.message} Bu sonuçlar development amaçlı örnek kayıtlardır.`}
+          title="Örnek katalog filtreleniyor"
+          body="Bu sonuçlar geçici örnek içerikler içerebilir."
         />
       ) : null}
 
@@ -256,12 +252,12 @@ export default async function VillaListingPage({
         <DataSourceNotice
           tone="error"
           title="Katalog geçici olarak kullanılamıyor"
-          body="Production ortamında demo ilanlar gösterilmez. Lütfen veritabanı yapılandırmasını doğruladıktan sonra tekrar deneyin."
+          body="Lütfen biraz sonra tekrar deneyin."
         />
       ) : villas.length ? (
         <section className="space-y-6">
           <div className="flex flex-wrap gap-2">
-            {concepts.slice(0, 8).map((concept) => (
+            {concepts.slice(0, 6).map((concept) => (
               <Link
                 key={concept.slug}
                 href={`/villa-kiralama?concept=${concept.slug}`}
@@ -286,7 +282,7 @@ export default async function VillaListingPage({
         <EmptyState
           icon={<Compass className="size-5" />}
           title="Sonuç bulunamadı"
-          description="Filtreleri biraz genişletin veya farklı bir bölge deneyin. Villawe yalnızca yayınlanmış ve erişilebilir villaları gösterir."
+          description="Filtreleri biraz genişletin veya farklı bir bölge deneyin."
           action={
             <Link
               href="/villa-kiralama"
@@ -300,24 +296,6 @@ export default async function VillaListingPage({
           }
         />
       )}
-
-      <Card className="villawe-soft-panel">
-        <CardContent className="flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
-          <div className="space-y-2">
-            <p className="section-kicker">Filtre Desteği</p>
-            <h2 className="text-3xl font-semibold tracking-tight">
-              Bölge, konsept ve özellikleri birlikte kullanın
-            </h2>
-            <p className="text-sm leading-7 text-muted-foreground">
-              Tatil tipi ve villa özelliklerini aynı anda filtreleyerek daha hızlı karar verebilirsiniz.
-            </p>
-          </div>
-          <div className="inline-flex items-center gap-2 rounded-full bg-card px-4 py-2 text-sm font-semibold text-primary shadow-[0_14px_34px_-28px_rgba(18,110,130,0.2)]">
-            <SlidersHorizontal className="size-4" />
-            Mobil filtre çekmecesi aktif
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }

@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 type SectionHeadingProps = {
   kicker: string;
   title: string;
-  description: string;
+  description?: string;
   align?: "left" | "center";
   action?: ReactNode;
   className?: string;
@@ -26,15 +26,17 @@ export function SectionHeading({
         align === "center" ? "mx-auto max-w-4xl text-center" : "",
         className,
       )}
-    >
+      >
       <p className="section-kicker">{kicker}</p>
-      <div className="space-y-3">
+      <div className={description ? "space-y-3" : ""}>
         <h2 className="max-w-4xl text-4xl font-semibold tracking-tight text-balance text-foreground sm:text-5xl">
           {title}
         </h2>
-        <p className="max-w-3xl text-base leading-8 text-muted-foreground sm:text-lg">
-          {description}
-        </p>
+        {description ? (
+          <p className="max-w-3xl text-base leading-8 text-muted-foreground sm:text-lg">
+            {description}
+          </p>
+        ) : null}
       </div>
       {action ? <div>{action}</div> : null}
     </div>

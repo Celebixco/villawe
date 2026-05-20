@@ -8,7 +8,7 @@ import { buildMetadata } from "@/features/seo/metadata";
 
 export const metadata = buildMetadata({
   title: "Hakkımızda | Villawe",
-  description: "Villawe'nin güven odaklı ürün yaklaşımı ve platform misyonu.",
+  description: "Villawe'nin seçkin, güvenli ve sade tatil deneyimine yaklaşımı.",
   path: "/hakkimizda",
 });
 
@@ -18,8 +18,8 @@ export default function AboutPage() {
       <section className="villawe-section-band villawe-gradient-band space-y-6">
         <SectionHeading
           kicker="Hakkımızda"
-          title="Önce güven, sonra rezervasyon talebi"
-          description="Villawe, villa kiralama pazarındaki sahte ilan, belirsiz kapora ve gizli ücret problemlerine ürün seviyesinde çözüm üretmek için kuruldu."
+          title="Villawe hakkında"
+          description="Özenle seçilmiş villaları net fiyat ve güvenli talep deneyimiyle buluşturuyoruz."
         />
       </section>
 
@@ -27,12 +27,10 @@ export default function AboutPage() {
         <Card className="villawe-panel">
           <CardContent className="space-y-4 p-7 text-sm leading-8 text-muted-foreground sm:text-base">
             <p>
-              Platformumuzda doğrulama rozetleri pazarlama etiketi değildir. Her rozetin
-              arkasında veritabanında saklanan ve admin tarafından yönetilen gerçek bir kontrol alanı bulunur.
+              Villawe, tatil planını yormayan ama güven duygusunu da geri plana itmeyen bir villa seçkisi sunmak için tasarlandı.
             </p>
             <p>
-              İlk versiyonda online ödeme yerine güvenli talep akışı, şeffaf fiyat özeti ve operasyonel
-              yönetim kalitesi üzerine odaklanıyoruz.
+              Seçkin ilanları, net fiyat bilgisini ve güvenli talep akışını sade bir deneyimde bir araya getiriyoruz.
             </p>
           </CardContent>
         </Card>
@@ -41,18 +39,18 @@ export default function AboutPage() {
           {[
             {
               icon: ShieldCheck,
-              title: "Gerçek doğrulama mantığı",
-              body: "Yalnızca tamamlanan kontrol alanları kamuya açık rozetlere dönüşür.",
+              title: "Doğrulanmış seçki",
+              body: "Güven veren ilanları öne çıkaran sakin ve seçici bir katalog.",
             },
             {
               icon: Compass,
-              title: "Karar dostu arama deneyimi",
-              body: "Bölge, konsept ve yaşam tarzı filtresi aynı akışta birleşir.",
+              title: "Karar dostu arama",
+              body: "Bölge, konsept ve yaşam tarzı tercihlerine göre net bir keşif akışı.",
             },
             {
               icon: Sparkles,
-              title: "Premium ama sade ürün dili",
-              body: "Karmaşık değil; güven veren, net ve modern bir tatil keşif deneyimi.",
+              title: "Sade lüks yaklaşımı",
+              body: "Kalabalık değil; dingin, modern ve tatil odaklı bir marka dili.",
             },
           ].map((item) => {
             const Icon = item.icon;

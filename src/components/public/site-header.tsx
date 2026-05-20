@@ -29,7 +29,7 @@ export function SiteHeader() {
           </div>
           <div className="space-y-0.5">
             <p className="text-xl font-semibold tracking-tight text-primary-dark">villawe</p>
-            <p className="text-xs text-muted-foreground">Doğrulanmış villa keşfi</p>
+            <p className="text-xs text-muted-foreground">Seçkin villa seçkisi</p>
           </div>
         </Link>
 
@@ -70,15 +70,6 @@ export function SiteHeader() {
             <Heart className="size-4" />
           </Link>
           <Link
-            href="/admin/login"
-            className={buttonVariants({
-              variant: "outline",
-              className: "rounded-full",
-            })}
-          >
-            Admin Girişi
-          </Link>
-          <Link
             href="/iletisim#listeleme"
             className={buttonVariants({
               variant: "accent",
@@ -110,7 +101,7 @@ export function SiteHeader() {
                 villawe
               </SheetTitle>
               <SheetDescription>
-                Hayalinizdeki villayı keşfedin, fiyatı şeffaf görün ve güvenle talep gönderin.
+                Seçkin villaları sade ve güvenli bir akışla keşfedin.
               </SheetDescription>
             </SheetHeader>
 
@@ -162,15 +153,6 @@ export function SiteHeader() {
                   })}
                 >
                   Villanızı Listeleyin
-                </Link>
-                <Link
-                  href="/admin/login"
-                  className={buttonVariants({
-                    variant: "outline",
-                    className: "w-full rounded-full",
-                  })}
-                >
-                  Admin Girişi
                 </Link>
               </div>
             </nav>

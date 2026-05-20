@@ -34,7 +34,7 @@ import {
 } from "@/features/seo/metadata";
 import { getSimilarVillas, getVillaBySlug } from "@/features/villas/queries";
 import { getDatabaseHealth } from "@/lib/db/prisma";
-import { parseDemoVillaTitle } from "@/lib/demo-villa";
+import { getPublicVillaCopy } from "@/lib/demo-villa";
 
 export const dynamic = "force-dynamic";
 
@@ -69,9 +69,11 @@ export async function generateMetadata({
     });
   }
 
+  const publicVilla = getPublicVillaCopy(villa);
+
   return buildMetadata({
     title: `${villa.title} | Villawe`,
-    description: villa.shortDescription,
+    description: publicVilla.metaDescription,
     path: `/villalar/${villa.slug}`,
     image: villa.coverImage.url,
   });
@@ -92,14 +94,13 @@ export default async function VillaDetailPage({
         <DataSourceNotice
           tone="error"
           title="Villa sayfası geçici olarak kullanılamıyor"
-          body="Production ortamında demo ilan gösterilmez. Veritabanı bağlantısı tekrar sağlandığında bu villa sayfası otomatik olarak açılacaktır."
+          body="Bu villa sayfasına şu anda erişilemiyor. Lütfen biraz sonra tekrar deneyin."
         />
         <Card className="villawe-panel">
           <CardContent className="space-y-4 p-8">
             <h1 className="text-4xl font-semibold tracking-tight">Katalog bakımı devam ediyor</h1>
             <p className="text-sm leading-7 text-muted-foreground">
-              Güncel stok ve doğrulama kayıtları yüklenemediği için bu sayfada örnek villa
-              gösterimi yapılmıyor.
+              Villa bilgileri yeniden yüklendiğinde bu sayfa otomatik olarak açılacaktır.
             </p>
             <Link href="/villa-kiralama" className="text-sm font-semibold text-primary">
               Listeleme sayfasına dön
@@ -115,7 +116,7 @@ export default async function VillaDetailPage({
   }
 
   const similarVillas = await getSimilarVillas(slug);
-  const titleMeta = parseDemoVillaTitle(villa.title);
+  const titleMeta = getPublicVillaCopy(villa);
 
   const breadcrumbJsonLd = buildBreadcrumbJsonLd([
     { name: "Villawe", path: "/" },
@@ -128,7 +129,7 @@ export default async function VillaDetailPage({
     "@context": "https://schema.org",
     "@type": "LodgingBusiness",
     name: villa.title,
-    description: villa.shortDescription,
+    description: titleMeta.metaDescription,
     image: villa.media.map((media) => buildAbsoluteUrl(media.url).toString()),
     url: buildAbsoluteUrl(`/villalar/${villa.slug}`).toString(),
     address: {
@@ -242,9 +243,12 @@ export default async function VillaDetailPage({
               {villa.verification.identityVerified &&
               villa.verification.ownershipOrAuthorityVerified &&
               villa.verification.tourismPermitVerified ? (
-                <Badge variant="success">Doğrulanmış Villa</Badge>
+                <Badge variant="success">Doğrulanmış</Badge>
               ) : null}
             </div>
+            {titleMeta.demoInlineNote ? (
+              <p className="text-xs text-muted-foreground">{titleMeta.demoInlineNote}</p>
+            ) : null}
 
             <div className="space-y-4">
               <div className="flex flex-wrap items-start justify-between gap-4">
@@ -261,11 +265,11 @@ export default async function VillaDetailPage({
               </div>
 
               <p className="max-w-3xl text-base leading-8 text-muted-foreground sm:text-lg">
-                {villa.summary}
+                {titleMeta.summary}
               </p>
             </div>
 
-            <TrustBadges verification={villa.verification} />
+            <TrustBadges verification={villa.verification} mode="compact" />
           </div>
 
           <Card className="villawe-soft-panel">
@@ -308,7 +312,7 @@ export default async function VillaDetailPage({
                 </div>
               </div>
               <p className="text-sm leading-7 text-muted-foreground">
-                Temizlik, hizmet bedeli ve depozito toplam tahmin içinde ayrıca görünür.
+                Temizlik ve depozito bilgileri talep öncesinde nettir.
               </p>
             </CardContent>
           </Card>
@@ -368,7 +372,7 @@ export default async function VillaDetailPage({
                 <p className="section-kicker">Genel Bakış</p>
                 <h2 className="text-3xl font-semibold tracking-tight">Villa hakkında</h2>
                 <p className="text-sm leading-8 text-muted-foreground sm:text-base">
-                  {villa.description}
+                  {titleMeta.description}
                 </p>
               </CardContent>
             </Card>
@@ -560,7 +564,7 @@ export default async function VillaDetailPage({
               <CardContent className="space-y-5 p-7">
                 <div className="space-y-2">
                   <p className="section-kicker">İptal & Depozito</p>
-                  <h2 className="text-3xl font-semibold tracking-tight">Şeffaf politika özeti</h2>
+                  <h2 className="text-3xl font-semibold tracking-tight">İptal ve depozito</h2>
                 </div>
                 <div className="grid gap-4 lg:grid-cols-2">
                   <div className="rounded-[1.5rem] border border-border/70 bg-muted/72 px-5 py-5">
@@ -591,11 +595,11 @@ export default async function VillaDetailPage({
           <Card className="villawe-soft-panel">
             <CardContent className="space-y-4 p-6">
               <p className="section-kicker">Yetkili İletişim</p>
-              <h2 className="text-2xl font-semibold tracking-tight">Villa yetkili özeti</h2>
+              <h2 className="text-2xl font-semibold tracking-tight">Villawe notu</h2>
               <div className="rounded-[1.5rem] border border-border/70 bg-card px-4 py-4">
                 <p className="font-semibold text-foreground">{villa.ownerName}</p>
                 <p className="mt-2 text-sm leading-7 text-muted-foreground">
-                  Talep sonrası müsaitlik ve fiyat teyidi Villawe iş akışı içinde paylaşılır.
+                  Müsaitlik ve fiyat teyidi talep sonrasında Villawe üzerinden paylaşılır.
                 </p>
               </div>
             </CardContent>

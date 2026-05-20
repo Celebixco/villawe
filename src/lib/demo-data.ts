@@ -731,20 +731,35 @@ export const demoAuditLogs: AuditLogRecord[] = [
 
 export const demoPolicies = {
   safeRentalWarnings: [
-    "Platform dışı ödeme yapmayın ve IBAN/kripto yönlendirmelerini bize bildirin.",
-    "Kapora, depozito ve hizmet bedelleri rezervasyon talebi oluşturmadan önce görünmelidir.",
-    "Doğrulama rozeti olmayan maddeleri kesin doğrulanmış bilgi gibi değerlendirmeyin.",
+    "Ödemeyi yalnızca teyitli akışta yapın.",
+    "Depozito ve ek ücretleri talep öncesinde görün.",
+    "Kararsız kaldığınız adımlarda ekibimizden teyit isteyin.",
   ],
   faqs: [
     {
       question: "Villawe tüm villaları nasıl doğrular?",
       answer:
-        "Kimlik, ilan yetkisi, turizm izni, konum, telefon ve görsel tutarlılığı ayrı alanlar halinde doğrulanır.",
+        "İlan yetkisi, konum, iletişim ve görsel tutarlılık kontrolleri tamamlanan villalar doğrulama rozetiyle gösterilir.",
     },
     {
-      question: "Neden tüm ücret kalemleri ayrı gösteriliyor?",
+      question: "Ücret kalemleri neden ayrı gösteriliyor?",
       answer:
-        "Temizlik, hizmet, depozito ve ek misafir ücretlerinin görünür olması sürpriz maliyetleri önler.",
+        "Temizlik, hizmet ve depozito gibi kalemlerin baştan görünür olması karar sürecini netleştirir.",
+    },
+    {
+      question: "Talep gönderdikten sonra ne olur?",
+      answer:
+        "Talebiniz alındıktan sonra müsaitlik ve fiyat teyidi Villawe üzerinden paylaşılır.",
+    },
+    {
+      question: "Depozito ne zaman netleşir?",
+      answer:
+        "Depozito tutarı villa bazında gösterilir ve talep öncesinde görünür durumda olur.",
+    },
+    {
+      question: "Platform dışı ödeme istenirse ne yapmalıyım?",
+      answer:
+        "İşlemi durdurun ve size iletilen talebi Villawe üzerinden yeniden teyit edin.",
     },
   ],
 };

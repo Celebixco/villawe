@@ -13,20 +13,8 @@ export function SiteFooter() {
             <div className="space-y-4">
               <p className="text-2xl font-semibold tracking-tight">villawe</p>
               <p className="max-w-md text-sm leading-7 text-white/74">
-                Güvenilir, doğrulanmış ve size özel villalar Villawe’de sizi bekliyor.
-                Şeffaf fiyatlandırma, gerçek doğrulama rozetleri ve güvenli talep akışı
-                platformun temelidir.
+                Doğrulanmış villalar, net fiyatlar ve güvenli talep akışı.
               </p>
-              <div className="flex flex-wrap gap-2">
-                {["%100 Güvenli", "Şeffaf Fiyatlandırma", "7/24 Destek"].map((item) => (
-                  <span
-                    key={item}
-                    className="rounded-full border border-white/16 bg-white/10 px-3 py-1 text-xs font-medium text-white/86"
-                  >
-                    {item}
-                  </span>
-                ))}
-              </div>
             </div>
 
             <div className="space-y-3">
@@ -41,7 +29,7 @@ export function SiteFooter() {
                   Bölgeler
                 </Link>
                 <Link href="/#konseptler" className="transition hover:text-white">
-                  Villa Konseptleri
+                  Konseptler
                 </Link>
                 <Link href="/blog" className="transition hover:text-white">
                   Rehber
@@ -84,7 +72,7 @@ export function SiteFooter() {
                   </div>
                   <div className="mt-3 flex items-start gap-3">
                     <PhoneCall className="mt-0.5 size-4 text-secondary" />
-                    <p>Güvenlik ve listeleme talepleri için hızlı dönüş</p>
+                    <p>Listeleme ve güvenlik bildirimleri için hızlı dönüş</p>
                   </div>
                 </div>
                 <Link
@@ -102,7 +90,7 @@ export function SiteFooter() {
           </div>
 
           <div className="border-t border-white/10 px-6 py-4 text-xs text-white/60 sm:px-8 lg:px-10">
-            © {new Date().getFullYear()} {siteConfig.domain} · Güvenli villa keşfi ve rezervasyon talep platformu
+            © {new Date().getFullYear()} {siteConfig.domain}
           </div>
         </div>
       </div>

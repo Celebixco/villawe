@@ -33,15 +33,15 @@ export default async function ReservationRequestPage({
             success === "1"
               ? "Talebiniz güvenle alındı"
               : success === "demo"
-                ? "Demo talep önizlemesi"
+                ? "Talep önizlemesi"
                 : "Rezervasyon talep akışı"
           }
           description={
             success === "1"
               ? "Ekibimiz fiyat özeti ve müsaitlik durumunu çakışma kontrolüyle inceleyip size dönüş yapacak."
               : success === "demo"
-                ? "Demo modunda talep formu test edildi; kayıt veritabanına yazılmadı."
-                : "Talep sürecinde kapora, iptal ve müsaitlik çakışmaları güven odaklı biçimde ele alınır."
+                ? "Talep akışının önizlemesini görüntülüyorsunuz."
+                : "Talep sürecinde fiyat, müsaitlik ve güvenlik adımları net biçimde ele alınır."
           }
         />
       </section>
@@ -95,8 +95,7 @@ export default async function ReservationRequestPage({
               </div>
               <h2 className="text-2xl font-semibold tracking-tight">Ortalama dönüş süresi</h2>
               <p className="text-sm leading-7 text-muted-foreground">
-                Operasyon ekibi, yoğunluk ve villa takvimi durumuna göre en kısa sürede
-                müsaitlik ve fiyat geri bildirimi sağlar.
+                Yoğunluk ve villa takvimine göre ekibimiz size en kısa sürede geri dönüş yapar.
               </p>
             </CardContent>
           </Card>
@@ -108,8 +107,7 @@ export default async function ReservationRequestPage({
               </div>
               <h2 className="text-2xl font-semibold tracking-tight">Güvenli teyit akışı</h2>
               <p className="text-sm leading-7 text-muted-foreground">
-                Talebiniz boyunca platform dışı ödeme uyarıları, net fiyat özeti ve doğrulama
-                durumları görünür kalır.
+                Talep boyunca fiyat özeti ve güvenlik uyarıları görünür kalır.
               </p>
             </CardContent>
           </Card>

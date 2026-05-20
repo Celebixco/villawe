@@ -36,11 +36,8 @@ export function VillaPriceInquiryCard({
                 ₺{villa.pricing.basePrice.toLocaleString("tr-TR")}
               </p>
             </div>
-            <div className="rounded-2xl border border-success/18 bg-success/10 px-3 py-2 text-right">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-success">
-                Güvenli
-              </p>
-              <p className="text-xs text-muted-foreground">Şeffaf fiyat akışı</p>
+            <div className="rounded-full border border-success/18 bg-success/10 px-3 py-2 text-xs font-semibold text-success">
+              Net fiyat
             </div>
           </div>
           <div className="flex flex-wrap gap-2 text-xs font-semibold">
@@ -134,8 +131,8 @@ export function VillaPriceInquiryCard({
                     </p>
                     <p className="mt-1 text-xs leading-6 text-muted-foreground">
                       {estimate.nights > 0
-                        ? "Temizlik ve hizmet bedeli dahil tahmini konaklama toplamı."
-                        : "Tarih seçerek toplam konaklama tahminini hemen görün."}
+                        ? "Temizlik ve hizmet bedeli dahil."
+                        : "Tarih seçerek toplamı görün."}
                     </p>
                   </div>
                   <p className="text-3xl font-semibold tracking-tight text-primary">
@@ -144,7 +141,7 @@ export function VillaPriceInquiryCard({
                 </div>
               </div>
               <p className="pt-1 text-xs leading-6 text-muted-foreground">
-                Depozito, varış öncesi bilgilendirme akışında ayrıca teyit edilir ve toplam tahmine dahil edilmez.
+                Depozito toplam tahmine dahil değildir.
               </p>
             </div>
           </div>
@@ -193,8 +190,7 @@ export function VillaPriceInquiryCard({
             <div className="flex items-start gap-3">
               <CircleAlert className="mt-0.5 size-4 shrink-0 text-warning" />
               <p className="text-sm leading-7 text-foreground">
-                Platform dışı ödeme yapmayın. Kapora, hizmet bedeli ve depozito detaylarını
-                yalnızca resmi Villawe kanalları üzerinden teyit edin.
+                Platform dışı ödeme yapmayın. Ödeme ve depozito detaylarını Villawe üzerinden teyit edin.
               </p>
             </div>
 
@@ -206,7 +202,7 @@ export function VillaPriceInquiryCard({
                 required
                 className="mt-1 size-4 rounded border border-input accent-[var(--primary)]"
               />
-              <span>Depozito, temizlik ve hizmet bedellerini gördüm.</span>
+              <span>Depozito ve ek ücretleri gördüm.</span>
             </label>
 
             <label className="flex items-start gap-3 text-sm leading-6 text-foreground">
@@ -217,7 +213,7 @@ export function VillaPriceInquiryCard({
                 required
                 className="mt-1 size-4 rounded border border-input accent-[var(--primary)]"
               />
-              <span>Platform dışı ödeme yapmayacağımı biliyorum.</span>
+              <span>Ödemeyi yalnızca teyitli akışta yapacağım.</span>
             </label>
           </div>
 

@@ -20,8 +20,7 @@ export function HeroSearchBox({ regions }: HeroSearchBoxProps) {
               Bölge, tarih ve misafire göre arayın
             </h2>
             <p className="mt-2 max-w-2xl text-sm leading-7 text-muted-foreground">
-              Doğrulanmış villa seçkisini filtreleyin, temel ücret kalemlerini görün ve
-              talep sürecine güvenle başlayın.
+              Tatilinize uygun villaları hızlıca keşfedin.
             </p>
           </div>
         </div>
