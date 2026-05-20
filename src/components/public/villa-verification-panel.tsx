@@ -1,6 +1,7 @@
-import { BadgeInfo, MapPinned, PhoneCall, Shield, UserRoundCheck } from "lucide-react";
+import { format, parseISO } from "date-fns";
+import { tr } from "date-fns/locale";
+import { BadgeCheck, CheckCircle2, MapPinned, Shield, UserRoundCheck } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import type { VerificationFlags } from "@/features/villas/types";
 
@@ -27,27 +28,32 @@ const verificationItems = [
   {
     key: "photosVerified",
     label: "Fotoğraf",
-    icon: BadgeInfo,
-  },
-  {
-    key: "phoneVerified",
-    label: "Telefon",
-    icon: PhoneCall,
+    icon: BadgeCheck,
   },
 ] as const;
+
+function formatVerifiedDate(value: string) {
+  try {
+    return format(parseISO(value), "d MMMM yyyy", { locale: tr });
+  } catch {
+    return value;
+  }
+}
 
 export function VillaVerificationPanel({
   verification,
 }: VillaVerificationPanelProps) {
   return (
-    <Card className="villawe-panel">
-      <CardContent className="space-y-6 p-6 sm:p-7">
+    <Card className="villawe-soft-panel">
+      <CardContent className="space-y-5 p-6">
         <div className="space-y-2">
-          <p className="section-kicker">Villawe Güvencesi</p>
-          <h2 className="text-3xl font-semibold tracking-tight">Doğrulama özeti</h2>
+          <h2 className="text-2xl font-semibold tracking-tight">Villawe kontrolünden geçti</h2>
+          <p className="text-sm leading-7 text-muted-foreground">
+            Kimlik, belge, konum ve fotoğraf kontrolleri tamamlandı.
+          </p>
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-2">
           {verificationItems.map((item) => {
             const Icon = item.icon;
             const active =
@@ -63,16 +69,21 @@ export function VillaVerificationPanel({
                 key={item.key}
                 className="rounded-[1.4rem] border border-border/75 bg-muted/72 px-4 py-4"
               >
-                <div className="flex items-start gap-3">
-                  <div className="flex size-10 items-center justify-center rounded-2xl bg-card text-primary shadow-[0_14px_28px_-24px_rgba(18,110,130,0.22)]">
-                    <Icon className="size-4" />
-                  </div>
-                  <div className="space-y-2">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="flex size-10 items-center justify-center rounded-2xl bg-card text-primary shadow-[0_14px_28px_-24px_rgba(18,110,130,0.22)]">
+                      <Icon className="size-4" />
+                    </div>
                     <p className="text-sm font-semibold text-foreground">{item.label}</p>
-                    <Badge variant={active ? "success" : "outline"}>
-                      {active ? "Tamamlandı" : "Bekleniyor"}
-                    </Badge>
                   </div>
+                  {active ? (
+                    <span className="inline-flex items-center gap-1 text-xs font-medium text-success">
+                      <CheckCircle2 className="size-3.5" />
+                      Onaylı
+                    </span>
+                  ) : (
+                    <span className="text-xs text-muted-foreground">İnceleniyor</span>
+                  )}
                 </div>
               </div>
             );
@@ -80,12 +91,9 @@ export function VillaVerificationPanel({
         </div>
 
         {verification.lastVerifiedAt ? (
-          <div className="rounded-[1.5rem] border border-border/70 bg-card px-5 py-5 shadow-[0_14px_34px_-28px_rgba(18,110,130,0.18)]">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
-              Son kontrol
-            </p>
-            <p className="mt-2 text-sm text-foreground">{verification.lastVerifiedAt}</p>
-          </div>
+          <p className="text-xs text-muted-foreground">
+            Son kontrol: {formatVerifiedDate(verification.lastVerifiedAt)}
+          </p>
         ) : null}
       </CardContent>
     </Card>

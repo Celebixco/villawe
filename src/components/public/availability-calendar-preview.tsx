@@ -1,3 +1,5 @@
+import { format, parseISO } from "date-fns";
+import { tr } from "date-fns/locale";
 import { CalendarRange, ShieldAlert } from "lucide-react";
 
 import { EmptyState } from "@/components/public/empty-state";
@@ -7,6 +9,33 @@ type AvailabilityCalendarPreviewProps = {
   blocks: AvailabilityBlockItem[];
 };
 
+function formatRangeLabel(startDate: string, endDate: string) {
+  const start = parseISO(startDate);
+  const end = parseISO(endDate);
+  const sameMonth = start.getMonth() === end.getMonth() && start.getFullYear() === end.getFullYear();
+
+  if (sameMonth) {
+    return `${format(start, "d", { locale: tr })} - ${format(end, "d MMMM", { locale: tr })}`;
+  }
+
+  return `${format(start, "d MMM", { locale: tr })} - ${format(end, "d MMM", { locale: tr })}`;
+}
+
+function resolveBlockLabel(block: AvailabilityBlockItem) {
+  switch (block.type) {
+    case "maintenance":
+      return "Bakım aralığı";
+    case "hold":
+      return "Bekleyen talep";
+    case "reserved":
+      return "Onaylı rezervasyon";
+    case "owner_use":
+      return "Özel kullanım";
+    default:
+      return block.label;
+  }
+}
+
 export function AvailabilityCalendarPreview({
   blocks,
 }: AvailabilityCalendarPreviewProps) {
@@ -14,8 +43,8 @@ export function AvailabilityCalendarPreview({
     return (
       <EmptyState
         icon={<CalendarRange className="size-5" />}
-        title="Aktif blok görünmüyor"
-        description="Bu villa için açık bir blok görünmüyor. Kesin müsaitlik teyidi için talep gönderdiğinizde çakışma kontrolü yapılır."
+        title="Açık blok görünmüyor"
+        description="Takvim güncellemeleri talep öncesinde teyit edilir."
       />
     );
   }
@@ -32,12 +61,11 @@ export function AvailabilityCalendarPreview({
               <ShieldAlert className="size-4" />
             </div>
             <div className="space-y-2">
-              <p className="text-sm font-semibold text-foreground">{block.label}</p>
-              <p className="text-xs uppercase tracking-[0.18em] text-primary">
-                {block.type.replaceAll("_", " ")}
+              <p className="text-sm font-semibold text-foreground">
+                {formatRangeLabel(block.startDate, block.endDate)} arası kapalı
               </p>
               <p className="text-sm leading-6 text-muted-foreground">
-                {block.startDate} - {block.endDate}
+                {resolveBlockLabel(block)}
               </p>
             </div>
           </div>

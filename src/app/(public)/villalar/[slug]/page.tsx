@@ -1,24 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import {
-  Bath,
-  BedDouble,
-  Compass,
-  House,
-  MapPin,
-  Snowflake,
-  Users,
-  Waves,
-  Wifi,
-} from "lucide-react";
+import { MapPin } from "lucide-react";
 
 import { AmenityGrid } from "@/components/public/amenity-grid";
 import { AvailabilityCalendarPreview } from "@/components/public/availability-calendar-preview";
 import { ReviewSummaryCard } from "@/components/public/review-summary-card";
 import { SafeRentalAlert } from "@/components/public/safe-rental-alert";
 import { SimilarVillas } from "@/components/public/similar-villas";
-import { TrustBadges } from "@/components/public/trust-badges";
 import { VillaGallery } from "@/components/public/villa-gallery";
 import { VillaPriceInquiryCard } from "@/components/public/villa-price-inquiry-card";
 import { VillaSelectionControls } from "@/components/public/villa-selection-controls";
@@ -155,52 +144,60 @@ export default async function VillaDetailPage({
     },
   };
 
-  const keyFeatures = [
+  const heroFacts = [
     {
-      label: "Misafir",
-      value: `${villa.maxGuests} kişi`,
-      icon: Users,
+      label: "Gecelik",
+      value: `₺${villa.pricing.basePrice.toLocaleString("tr-TR")} gecelikten başlayan`,
     },
     {
-      label: "Yatak Odası",
-      value: `${villa.bedroomCount} oda`,
-      icon: BedDouble,
+      label: "Minimum",
+      value: `${villa.pricing.minNights} gece`,
     },
     {
-      label: "Banyo",
-      value: `${villa.bathroomCount} banyo`,
-      icon: Bath,
+      label: "Kapasite",
+      value: `${villa.maxGuests} misafir`,
     },
     {
-      label: "Havuz",
-      value: villa.features.hasPrivatePool ? "Özel havuz" : "Ortak havuz",
-      icon: Waves,
-    },
-    {
-      label: "Jakuzi",
-      value: villa.features.hasJacuzzi ? "Var" : "Yok",
-      icon: House,
-    },
-    {
-      label: "Manzara",
-      value: villa.features.hasSeaView
-        ? "Deniz manzarası"
-        : villa.features.hasNatureView
-          ? "Doğa manzarası"
-          : "Standart görünüm",
-      icon: Compass,
-    },
-    {
-      label: "Klima",
-      value: villa.features.hasAirConditioning ? "Var" : "Yok",
-      icon: Snowflake,
-    },
-    {
-      label: "İnternet",
-      value: villa.features.hasInternet ? "Wi-Fi" : "Belirtilmedi",
-      icon: Wifi,
+      label: "Depozito",
+      value: `₺${villa.pricing.depositAmount.toLocaleString("tr-TR")}`,
     },
   ];
+
+  const roomSummaries = villa.rooms.map((room) => ({
+    id: room.id,
+    name: room.name,
+    details: room.beds.length
+      ? room.beds.map((bed) => `${bed.quantity} x ${bed.type} (${bed.sleeps} kişi)`).join(" · ")
+      : "Yatak bilgisi talep öncesinde paylaşılır.",
+    note: room.description || room.roomType,
+  }));
+
+  const outdoorHighlights = [
+    villa.features.hasPrivatePool ? "Özel havuz" : "Ortak havuz",
+    villa.features.hasHeatedPool ? "Isıtmalı havuz" : null,
+    villa.features.hasJacuzzi ? "Jakuzi" : null,
+    villa.features.hasSeaView
+      ? "Deniz manzarası"
+      : villa.features.hasNatureView
+        ? "Doğa manzarası"
+        : null,
+    villa.features.nearBeach ? "Sahile yakın" : null,
+    ...villa.poolDetails,
+  ].filter((item): item is string => Boolean(item));
+
+  const sectionLinks = [
+    ["genel-bakis", "Genel Bakış"],
+    ["olanaklar", "Olanaklar"],
+    ["konum", "Konum"],
+    ["kurallar", "Kurallar"],
+    ["yorumlar", "Yorumlar"],
+  ] as const;
+
+  const priceCardVilla = {
+    slug: villa.slug,
+    maxGuests: villa.maxGuests,
+    pricing: villa.pricing,
+  };
 
   return (
     <div className="container-shell space-y-10 py-10 sm:py-12">
@@ -211,7 +208,7 @@ export default async function VillaDetailPage({
         }}
       />
 
-      <div className="space-y-4">
+      <div className="space-y-6">
         <nav className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
           <Link href="/" className="transition hover:text-primary-dark">
             Villawe
@@ -231,110 +228,64 @@ export default async function VillaDetailPage({
           <span className="text-foreground">{titleMeta.displayTitle}</span>
         </nav>
 
-        <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
+        <div className="space-y-6">
           <div className="space-y-5">
-            <div className="flex flex-wrap items-center gap-3">
-              <p className="section-kicker">
-                {villa.region.name} / {villa.district.name}
-              </p>
-              {titleMeta.isDemo ? (
-                <Badge variant="warning">{titleMeta.demoBadgeLabel}</Badge>
-              ) : null}
-              {villa.verification.identityVerified &&
-              villa.verification.ownershipOrAuthorityVerified &&
-              villa.verification.tourismPermitVerified ? (
-                <Badge variant="success">Doğrulanmış</Badge>
-              ) : null}
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex flex-wrap items-center gap-2.5">
+                {titleMeta.isDemo ? (
+                  <Badge variant="warning">{titleMeta.demoBadgeLabel}</Badge>
+                ) : null}
+                {villa.verification.identityVerified &&
+                villa.verification.ownershipOrAuthorityVerified &&
+                villa.verification.tourismPermitVerified ? (
+                  <Badge variant="success">Doğrulanmış</Badge>
+                ) : null}
+                {titleMeta.demoInlineNote ? (
+                  <p className="text-xs text-muted-foreground">{titleMeta.demoInlineNote}</p>
+                ) : null}
+              </div>
+              <VillaSelectionControls villaId={villa.id} compact />
             </div>
-            {titleMeta.demoInlineNote ? (
-              <p className="text-xs text-muted-foreground">{titleMeta.demoInlineNote}</p>
-            ) : null}
 
-            <div className="space-y-4">
-              <div className="flex flex-wrap items-start justify-between gap-4">
-                <div className="space-y-3">
-                  <h1 className="max-w-4xl text-4xl font-semibold tracking-tight text-balance sm:text-5xl xl:text-6xl">
-                    {titleMeta.displayTitle}
-                  </h1>
-                  <p className="inline-flex items-center gap-2 text-sm text-muted-foreground">
-                    <MapPin className="size-4 text-secondary" />
-                    {villa.locationLabel}
+            <div className="space-y-3">
+              <h1 className="max-w-4xl text-4xl font-semibold tracking-tight text-balance sm:text-5xl xl:text-6xl">
+                {titleMeta.displayTitle}
+              </h1>
+              <p className="inline-flex items-center gap-2 text-sm text-muted-foreground">
+                <MapPin className="size-4 text-secondary" />
+                {villa.locationLabel}
+              </p>
+              <p className="max-w-3xl text-base leading-8 text-muted-foreground sm:text-lg">
+                {titleMeta.shortDescription}
+              </p>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+              {heroFacts.map((fact) => (
+                <div
+                  key={fact.label}
+                  className="rounded-[1.45rem] border border-border/70 bg-card px-4 py-4 shadow-[0_14px_34px_-28px_rgba(18,110,130,0.18)]"
+                >
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+                    {fact.label}
+                  </p>
+                  <p className="mt-2 text-sm font-semibold leading-6 text-foreground">
+                    {fact.value}
                   </p>
                 </div>
-                <VillaSelectionControls villaId={villa.id} />
-              </div>
-
-              <p className="max-w-3xl text-base leading-8 text-muted-foreground sm:text-lg">
-                {titleMeta.summary}
-              </p>
+              ))}
             </div>
-
-            <TrustBadges verification={villa.verification} mode="compact" />
           </div>
 
-          <Card className="villawe-soft-panel">
-            <CardContent className="space-y-4 p-6">
-              <p className="section-kicker">Bilgi Özeti</p>
-              <div className="grid gap-3 sm:grid-cols-2">
-                <div className="rounded-[1.4rem] border border-border/70 bg-card px-4 py-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
-                    Başlangıç
-                  </p>
-                  <p className="mt-2 text-3xl font-semibold tracking-tight text-primary">
-                    ₺{villa.pricing.basePrice.toLocaleString("tr-TR")}
-                  </p>
-                </div>
-                <div className="rounded-[1.4rem] border border-border/70 bg-card px-4 py-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
-                    Minimum Konaklama
-                  </p>
-                  <p className="mt-2 text-3xl font-semibold tracking-tight text-foreground">
-                    {villa.pricing.minNights} gece
-                  </p>
-                </div>
-              </div>
-              <div className="grid gap-3 sm:grid-cols-2">
-                <div className="rounded-[1.4rem] border border-border/70 bg-card px-4 py-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
-                    Temizlik
-                  </p>
-                  <p className="mt-2 text-2xl font-semibold tracking-tight text-foreground">
-                    ₺{villa.pricing.cleaningFee.toLocaleString("tr-TR")}
-                  </p>
-                </div>
-                <div className="rounded-[1.4rem] border border-border/70 bg-card px-4 py-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
-                    Depozito
-                  </p>
-                  <p className="mt-2 text-2xl font-semibold tracking-tight text-foreground">
-                    ₺{villa.pricing.depositAmount.toLocaleString("tr-TR")}
-                  </p>
-                </div>
-              </div>
-              <p className="text-sm leading-7 text-muted-foreground">
-                Temizlik ve depozito bilgileri talep öncesinde nettir.
-              </p>
-            </CardContent>
-          </Card>
+          <VillaGallery title={villa.title} items={villa.media} />
         </div>
       </div>
-
-      <VillaGallery title={villa.title} items={villa.media} />
 
       <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_24rem] xl:grid-cols-[minmax(0,1fr)_26rem]">
         <div className="space-y-8">
           <div className="overflow-x-auto rounded-full border border-border/70 bg-card/90 p-2 shadow-[0_18px_48px_-34px_rgba(18,110,130,0.16)]">
             <div className="flex min-w-max items-center gap-2">
-              {[
-                ["genel-bakis", "Genel Bakış"],
-                ["ozellikler", "Özellikler"],
-                ["oda-yatak", "Oda & Yatak Bilgileri"],
-                ["havuz-bahce", "Havuz & Bahçe"],
-                ["konum", "Konum"],
-                ["yorumlar", "Yorumlar"],
-                ["kurallar", "Kurallar"],
-                ["iptal-depozito", "İptal & Depozito"],
-              ].map(([id, label]) => (
+              {sectionLinks.map(([id, label]) => (
                 <Link
                   key={id}
                   href={`#${id}`}
@@ -347,118 +298,77 @@ export default async function VillaDetailPage({
           </div>
 
           <section id="genel-bakis" className="space-y-6">
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-              {keyFeatures.map((feature) => {
-                const Icon = feature.icon;
+            <Card className="villawe-panel">
+              <CardContent className="space-y-6 p-7">
+                <div className="space-y-2">
+                  <p className="section-kicker">Genel Bakış</p>
+                  <h2 className="text-3xl font-semibold tracking-tight">Villa hakkında</h2>
+                </div>
+                <p className="max-w-4xl text-sm leading-8 text-muted-foreground sm:text-base">
+                  {titleMeta.description}
+                </p>
 
-                return (
-                  <Card key={feature.label} className="villawe-panel">
-                    <CardContent className="space-y-3 p-5">
-                      <div className="flex size-11 items-center justify-center rounded-2xl bg-muted text-primary">
-                        <Icon className="size-5" />
-                      </div>
-                      <div className="space-y-1">
-                        <p className="text-sm text-muted-foreground">{feature.label}</p>
-                        <p className="text-lg font-semibold tracking-tight">{feature.value}</p>
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
+                <div className="grid gap-4 lg:grid-cols-[1.05fr_0.95fr]">
+                  <div className="rounded-[1.7rem] border border-border/70 bg-muted/72 px-5 py-5">
+                    <h3 className="text-xl font-semibold tracking-tight">Konaklama düzeni</h3>
+                    <div className="mt-4 grid gap-3">
+                      {roomSummaries.map((room) => (
+                        <div
+                          key={room.id}
+                          className="rounded-[1.35rem] border border-border/70 bg-card px-4 py-4"
+                        >
+                          <p className="font-semibold text-foreground">{room.name}</p>
+                          <p className="mt-2 text-sm leading-7 text-muted-foreground">{room.details}</p>
+                          <p className="mt-2 text-xs text-muted-foreground">{room.note}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="rounded-[1.7rem] border border-border/70 bg-muted/72 px-5 py-5">
+                    <h3 className="text-xl font-semibold tracking-tight">Dış alan</h3>
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      {outdoorHighlights.length ? (
+                        outdoorHighlights.map((detail) => (
+                          <Badge key={detail} variant="outline" className="bg-card text-primary-dark">
+                            {detail}
+                          </Badge>
+                        ))
+                      ) : (
+                        <p className="text-sm leading-7 text-muted-foreground">
+                          Dış alan detayları talep öncesinde paylaşılır.
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
             <Card className="villawe-panel">
               <CardContent className="space-y-4 p-7">
-                <p className="section-kicker">Genel Bakış</p>
-                <h2 className="text-3xl font-semibold tracking-tight">Villa hakkında</h2>
-                <p className="text-sm leading-8 text-muted-foreground sm:text-base">
-                  {titleMeta.description}
-                </p>
-              </CardContent>
-            </Card>
-          </section>
-
-          <section id="ozellikler" className="space-y-6">
-            <Card className="villawe-panel">
-              <CardContent className="space-y-5 p-7">
-                <div className="space-y-2">
-                  <p className="section-kicker">Özellikler</p>
-                  <h2 className="text-3xl font-semibold tracking-tight">Konfor ve yaşam alanı detayları</h2>
-                </div>
-                <AmenityGrid amenities={villa.amenities} />
-              </CardContent>
-            </Card>
-
-            <VillaVerificationPanel verification={villa.verification} />
-          </section>
-
-          <section id="oda-yatak" className="space-y-6">
-            <Card className="villawe-panel">
-              <CardContent className="space-y-5 p-7">
-                <div className="space-y-2">
-                  <p className="section-kicker">Oda & Yatak Bilgileri</p>
-                  <h2 className="text-3xl font-semibold tracking-tight">Konaklama düzeni</h2>
-                </div>
-                <div className="grid gap-4 lg:grid-cols-2">
-                  {villa.rooms.map((room) => (
-                    <div
-                      key={room.id}
-                      className="rounded-[1.6rem] border border-border/70 bg-muted/72 px-5 py-5"
-                    >
-                      <div className="space-y-2">
-                        <h3 className="text-xl font-semibold tracking-tight">{room.name}</h3>
-                        <p className="text-sm text-muted-foreground">{room.roomType}</p>
-                        {room.description ? (
-                          <p className="text-sm leading-7 text-muted-foreground">{room.description}</p>
-                        ) : null}
-                        <div className="pt-1 text-sm leading-7 text-foreground">
-                          {room.beds.length
-                            ? room.beds
-                                .map((bed) => `${bed.quantity} x ${bed.type} (${bed.sleeps} kişi)`)
-                                .join(", ")
-                            : "Yatak bilgisi yakında eklenecek."}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </section>
-
-          <section id="havuz-bahce" className="space-y-6">
-            <Card className="villawe-panel">
-              <CardContent className="space-y-5 p-7">
-                <div className="space-y-2">
-                  <p className="section-kicker">Havuz & Bahçe</p>
-                  <h2 className="text-3xl font-semibold tracking-tight">Açık alan kullanımı</h2>
-                </div>
-                <div className="grid gap-4 lg:grid-cols-2">
-                  {villa.poolDetails.length ? (
-                    villa.poolDetails.map((detail) => (
-                      <div
-                        key={detail}
-                        className="rounded-[1.5rem] border border-border/70 bg-muted/72 px-4 py-4 text-sm leading-7 text-muted-foreground"
-                      >
-                        {detail}
-                      </div>
-                    ))
-                  ) : (
-                    <div className="rounded-[1.5rem] border border-border/70 bg-muted/72 px-4 py-4 text-sm leading-7 text-muted-foreground lg:col-span-2">
-                      Havuz ve bahçe detayları talep özetinde ayrıca paylaşılacaktır.
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="villawe-panel">
-              <CardContent className="space-y-5 p-7">
-                <div className="space-y-2">
-                  <p className="section-kicker">Müsaitlik</p>
-                  <h2 className="text-3xl font-semibold tracking-tight">Takvim ve blok özeti</h2>
+                <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+                  <div className="space-y-2">
+                    <p className="section-kicker">Takvim</p>
+                    <h3 className="text-2xl font-semibold tracking-tight">Müsaitlik</h3>
+                  </div>
+                  <p className="max-w-md text-sm leading-7 text-muted-foreground">
+                    Takvim güncellemeleri talep öncesinde teyit edilir.
+                  </p>
                 </div>
                 <AvailabilityCalendarPreview blocks={villa.availabilityBlocks} />
+              </CardContent>
+            </Card>
+          </section>
+
+          <section id="olanaklar" className="space-y-6">
+            <Card className="villawe-panel">
+              <CardContent className="space-y-5 p-7">
+                <div className="space-y-2">
+                  <p className="section-kicker">Olanaklar</p>
+                  <h2 className="text-3xl font-semibold tracking-tight">Konfor detayları</h2>
+                </div>
+                <AmenityGrid amenities={villa.amenities} />
               </CardContent>
             </Card>
           </section>
@@ -468,7 +378,7 @@ export default async function VillaDetailPage({
               <CardContent className="space-y-5 p-7">
                 <div className="space-y-2">
                   <p className="section-kicker">Konum</p>
-                  <h2 className="text-3xl font-semibold tracking-tight">Yakın çevre ve genel lokasyon</h2>
+                  <h2 className="text-3xl font-semibold tracking-tight">Yakın çevre</h2>
                 </div>
                 <div className="grid gap-6 lg:grid-cols-[1fr_0.9fr]">
                   <div className="space-y-4">
@@ -483,26 +393,27 @@ export default async function VillaDetailPage({
                         {villa.addressPublic}
                       </p>
                       <p className="mt-4 text-sm leading-7 text-primary-foreground/82">
-                        Harita konumu güvenlik amacıyla yaklaşık gösterilir; kesin yönlendirme
-                        talep onayı sonrasında paylaşılır.
+                        Konum güvenlik nedeniyle yaklaşık gösterilir. Kesin yönlendirme talep onayı sonrası paylaşılır.
                       </p>
                     </div>
                   </div>
 
                   <div className="rounded-[1.8rem] border border-border/70 bg-muted/72 px-5 py-5">
-                    <h3 className="text-xl font-semibold tracking-tight">Yakındaki Yerler</h3>
-                    <div className="mt-4 space-y-3">
+                    <h3 className="text-xl font-semibold tracking-tight">Yakın noktalar</h3>
+                    <div className="mt-4 grid gap-3">
                       {villa.nearbyPlaces.length ? (
                         villa.nearbyPlaces.map((place) => (
                           <div
                             key={place.name}
-                            className="flex items-center justify-between gap-4 border-b border-border/60 pb-3 text-sm"
+                            className="rounded-[1.35rem] border border-border/70 bg-card px-4 py-4 text-sm"
                           >
-                            <div>
+                            <div className="space-y-1">
                               <p className="font-medium text-foreground">{place.name}</p>
                               <p className="text-muted-foreground">{place.category}</p>
                             </div>
-                            <span className="font-medium text-primary">{place.distanceLabel}</span>
+                            <span className="mt-3 inline-flex text-sm font-semibold text-primary">
+                              {place.distanceLabel}
+                            </span>
                           </div>
                         ))
                       ) : (
@@ -526,12 +437,12 @@ export default async function VillaDetailPage({
               <CardContent className="space-y-5 p-7">
                 <div className="space-y-2">
                   <p className="section-kicker">Kurallar</p>
-                  <h2 className="text-3xl font-semibold tracking-tight">Giriş, çıkış ve ev kuralları</h2>
+                  <h2 className="text-3xl font-semibold tracking-tight">Konaklama koşulları</h2>
                 </div>
                 <div className="grid gap-4 lg:grid-cols-[0.8fr_1.2fr]">
                   <div className="rounded-[1.6rem] border border-border/70 bg-muted/72 px-5 py-5">
                     <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
-                      Check-in / Check-out
+                      Giriş / Çıkış
                     </p>
                     <p className="mt-3 text-lg font-semibold tracking-tight">
                       Giriş {villa.checkInTime}
@@ -555,17 +466,6 @@ export default async function VillaDetailPage({
                     )}
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          </section>
-
-          <section id="iptal-depozito" className="space-y-6">
-            <Card className="villawe-panel">
-              <CardContent className="space-y-5 p-7">
-                <div className="space-y-2">
-                  <p className="section-kicker">İptal & Depozito</p>
-                  <h2 className="text-3xl font-semibold tracking-tight">İptal ve depozito</h2>
-                </div>
                 <div className="grid gap-4 lg:grid-cols-2">
                   <div className="rounded-[1.5rem] border border-border/70 bg-muted/72 px-5 py-5">
                     <h3 className="text-xl font-semibold tracking-tight">İptal politikası</h3>
@@ -584,18 +484,19 @@ export default async function VillaDetailPage({
             </Card>
           </section>
 
-          <SafeRentalAlert />
-
           <SimilarVillas villas={similarVillas} />
         </div>
 
         <div className="space-y-6">
-          <VillaPriceInquiryCard villa={villa} action={createInquiryAction} />
+          <VillaPriceInquiryCard villa={priceCardVilla} action={createInquiryAction} />
+
+          <SafeRentalAlert />
+
+          <VillaVerificationPanel verification={villa.verification} />
 
           <Card className="villawe-soft-panel">
             <CardContent className="space-y-4 p-6">
-              <p className="section-kicker">Yetkili İletişim</p>
-              <h2 className="text-2xl font-semibold tracking-tight">Villawe notu</h2>
+              <h2 className="text-2xl font-semibold tracking-tight">Talep sonrası süreç</h2>
               <div className="rounded-[1.5rem] border border-border/70 bg-card px-4 py-4">
                 <p className="font-semibold text-foreground">{villa.ownerName}</p>
                 <p className="mt-2 text-sm leading-7 text-muted-foreground">

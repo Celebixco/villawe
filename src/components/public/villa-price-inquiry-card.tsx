@@ -1,14 +1,19 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { CalendarDays, CircleAlert, ShieldCheck, Users } from "lucide-react";
+import { CalendarDays, ShieldCheck, Users } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { calculateVillaEstimate } from "@/features/bookings/pricing";
 import type { VillaDetail } from "@/features/villas/types";
 
+type VillaPriceInquiryData = Pick<
+  VillaDetail,
+  "slug" | "maxGuests" | "pricing"
+>;
+
 type VillaPriceInquiryCardProps = {
-  villa: VillaDetail;
+  villa: VillaPriceInquiryData;
   action: (formData: FormData) => void | Promise<void>;
 };
 
@@ -23,30 +28,25 @@ export function VillaPriceInquiryCard({
     () => calculateVillaEstimate(villa, startDate, endDate, Number(guestCount)),
     [endDate, guestCount, startDate, villa],
   );
+  const hasDateSelection = estimate.nights > 0;
 
   return (
     <div className="villawe-floating-card lg:sticky lg:top-28">
       <div className="space-y-6 p-5 sm:p-6">
         <div className="space-y-3">
-          <p className="section-kicker">Fiyat & Talep</p>
-          <div className="flex items-end justify-between gap-4">
-            <div>
-              <p className="text-sm text-muted-foreground">Başlangıç gecelik fiyat</p>
-              <p className="text-4xl font-semibold tracking-tight text-primary">
-                ₺{villa.pricing.basePrice.toLocaleString("tr-TR")}
-              </p>
+          <div className="space-y-2">
+            <p className="section-kicker">Fiyat & Müsaitlik</p>
+            <div className="flex items-end justify-between gap-4">
+              <div className="space-y-2">
+                <p className="text-4xl font-semibold tracking-tight text-primary">
+                  ₺{villa.pricing.basePrice.toLocaleString("tr-TR")}
+                  <span className="ml-2 text-base font-medium text-muted-foreground">/ gece</span>
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {villa.pricing.minNights} gece minimum · {villa.maxGuests} misafire kadar
+                </p>
+              </div>
             </div>
-            <div className="rounded-full border border-success/18 bg-success/10 px-3 py-2 text-xs font-semibold text-success">
-              Net fiyat
-            </div>
-          </div>
-          <div className="flex flex-wrap gap-2 text-xs font-semibold">
-            <span className="rounded-full border border-border/70 bg-muted/72 px-3 py-2 text-primary-dark">
-              Minimum {villa.pricing.minNights} gece
-            </span>
-            <span className="rounded-full border border-border/70 bg-muted/72 px-3 py-2 text-primary-dark">
-              En fazla {villa.maxGuests} misafir
-            </span>
           </div>
         </div>
 
@@ -130,18 +130,16 @@ export function VillaPriceInquiryCard({
                       Tahmini Toplam
                     </p>
                     <p className="mt-1 text-xs leading-6 text-muted-foreground">
-                      {estimate.nights > 0
-                        ? "Temizlik ve hizmet bedeli dahil."
-                        : "Tarih seçerek toplamı görün."}
+                      {hasDateSelection ? "Temizlik ve hizmet bedeli dahil." : "Tarih seçerek toplamı görün."}
                     </p>
                   </div>
                   <p className="text-3xl font-semibold tracking-tight text-primary">
-                    ₺{Math.round(estimate.total).toLocaleString("tr-TR")}
+                    {hasDateSelection ? `₺${Math.round(estimate.total).toLocaleString("tr-TR")}` : "—"}
                   </p>
                 </div>
               </div>
               <p className="pt-1 text-xs leading-6 text-muted-foreground">
-                Depozito toplam tahmine dahil değildir.
+                Ödeme ve depozito detayları talep öncesinde teyit edilir.
               </p>
             </div>
           </div>
@@ -186,14 +184,7 @@ export function VillaPriceInquiryCard({
             </label>
           </div>
 
-          <div className="space-y-3 rounded-[1.5rem] border border-warning/24 bg-warning/10 px-4 py-4">
-            <div className="flex items-start gap-3">
-              <CircleAlert className="mt-0.5 size-4 shrink-0 text-warning" />
-              <p className="text-sm leading-7 text-foreground">
-                Platform dışı ödeme yapmayın. Ödeme ve depozito detaylarını Villawe üzerinden teyit edin.
-              </p>
-            </div>
-
+          <div className="space-y-3 rounded-[1.5rem] border border-border/70 bg-muted/70 px-4 py-4">
             <label className="flex items-start gap-3 text-sm leading-6 text-foreground">
               <input
                 type="checkbox"
@@ -202,7 +193,7 @@ export function VillaPriceInquiryCard({
                 required
                 className="mt-1 size-4 rounded border border-input accent-[var(--primary)]"
               />
-              <span>Depozito ve ek ücretleri gördüm.</span>
+              <span>Koşulları gördüm.</span>
             </label>
 
             <label className="flex items-start gap-3 text-sm leading-6 text-foreground">

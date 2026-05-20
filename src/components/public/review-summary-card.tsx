@@ -28,12 +28,7 @@ export function ReviewSummaryCard({ reviews }: ReviewSummaryCardProps) {
         <CardContent className="flex flex-col gap-4 p-6 sm:flex-row sm:items-end sm:justify-between">
           <div className="space-y-2">
             <p className="section-kicker">Konuk Değerlendirmeleri</p>
-            <h3 className="text-3xl font-semibold tracking-tight">
-              Ortalama {average.toFixed(1)} / 5 puan
-            </h3>
-            <p className="text-sm leading-7 text-muted-foreground">
-              Yalnızca onaylanmış konaklama yorumları gösterilir.
-            </p>
+            <h3 className="text-3xl font-semibold tracking-tight">Ortalama {average.toFixed(1)} / 5</h3>
           </div>
           <div className="inline-flex items-center gap-2 rounded-full border border-warning/25 bg-warning/10 px-4 py-2 text-sm font-semibold text-foreground">
             <Star className="size-4 fill-warning text-warning" />
