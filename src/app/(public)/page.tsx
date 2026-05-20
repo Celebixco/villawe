@@ -34,26 +34,50 @@ export const metadata = buildMetadata({
   path: "/",
 });
 
-const regionFallbacks: Record<string, string> = {
-  kas: "/images/villawe/villa-luna.svg",
-  kalkan: "/images/villawe/villa-solea.svg",
-  fethiye: "/images/villawe/villa-pool.svg",
-  bodrum: "/images/villawe/villa-nova.svg",
-  sapanca: "/images/villawe/villa-suite.svg",
+const popularRegionOrder = ["bodrum", "fethiye", "kas", "marmaris", "sapanca"] as const;
+
+type PopularRegionSlug = (typeof popularRegionOrder)[number];
+
+const popularRegionContent: Record<
+  PopularRegionSlug,
+  {
+    name: string;
+    description: string;
+    imageUrl: string;
+    imageAlt: string;
+  }
+> = {
+  bodrum: {
+    name: "Bodrum",
+    description: "Deniz, marina ve seçkin villalar.",
+    imageUrl: "/images/regions/bodrum.webp",
+    imageAlt: "Bodrum villa kiralama bölgesi",
+  },
+  fethiye: {
+    name: "Fethiye",
+    description: "Mavi lagün ve sakin koylar.",
+    imageUrl: "/images/regions/fethiye.webp",
+    imageAlt: "Fethiye villa kiralama bölgesi",
+  },
+  kas: {
+    name: "Kaş",
+    description: "Akdeniz'in en zarif kaçamakları.",
+    imageUrl: "/images/regions/kas.webp",
+    imageAlt: "Kaş villa kiralama bölgesi",
+  },
+  marmaris: {
+    name: "Marmaris",
+    description: "Yeşil dağlar, berrak koylar.",
+    imageUrl: "/images/regions/marmaris.webp",
+    imageAlt: "Marmaris villa kiralama bölgesi",
+  },
+  sapanca: {
+    name: "Sapanca",
+    description: "Göl manzaralı huzurlu kaçışlar.",
+    imageUrl: "/images/regions/sapanca.webp",
+    imageAlt: "Sapanca villa kiralama bölgesi",
+  },
 };
-
-function getRegionVisual(
-  regionSlug: string,
-  inventory: Awaited<ReturnType<typeof getHomePageData>>["villas"],
-) {
-  const matchingVilla = inventory.find((villa) => villa.region.slug === regionSlug);
-
-  return {
-    imageUrl:
-      matchingVilla?.coverImage.url || regionFallbacks[regionSlug] || "/images/villawe/villa-fallback.svg",
-    imageAlt: matchingVilla?.coverImage.alt || `${regionSlug} için Villawe bölge görseli`,
-  };
-}
 
 export default async function HomePage() {
   const [databaseHealth, data] = await Promise.all([
@@ -103,7 +127,20 @@ export default async function HomePage() {
     },
   ];
 
-  const curatedRegions = data.regions.slice(0, 5);
+  const regionsBySlug = new Map(data.regions.map((region) => [region.slug, region]));
+  const curatedRegions = popularRegionOrder.map((slug) => {
+    const region = regionsBySlug.get(slug);
+    const content = popularRegionContent[slug];
+
+    return {
+      id: region?.id || `region-${slug}`,
+      slug,
+      name: region?.name || content.name,
+      description: content.description,
+      imageUrl: content.imageUrl,
+      imageAlt: content.imageAlt,
+    };
+  });
   const featuredVillas = (data.featured.length ? data.featured : data.verified.length ? data.verified : data.villas).slice(0, 5);
   const guideFallbackCards: Array<{
     href: Route;
@@ -255,25 +292,23 @@ export default async function HomePage() {
       ) : null}
 
       <section id="bolgeler" className="container-shell py-12">
-        <div className="villawe-section-band villawe-gradient-band space-y-8">
+        <div className="villawe-section-band space-y-8">
           <SectionHeading
             kicker="Popüler Bölgeler"
             title="Popüler bölgeler"
           />
 
-          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-5">
+          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-6">
             {curatedRegions.map((region) => {
-              const visual = getRegionVisual(region.slug, data.villas);
-
               return (
                 <RegionCard
                   key={region.id}
                   href={`/${region.slug}-villa-kiralama`}
                   name={region.name}
-                  description={region.shortDescription}
-                  imageUrl={visual.imageUrl}
-                  imageAlt={visual.imageAlt}
-                  eyebrow="Öne çıkan destinasyon"
+                  description={region.description}
+                  imageUrl={region.imageUrl}
+                  imageAlt={region.imageAlt}
+                  className="xl:col-span-2"
                 />
               );
             })}
