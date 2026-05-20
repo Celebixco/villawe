@@ -1,7 +1,8 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
-import { Heart, Menu, Sparkles } from "lucide-react";
+import { Heart, Menu } from "lucide-react";
 import { usePathname } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
@@ -23,14 +24,15 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-40 border-b border-border/55 bg-background/84 backdrop-blur-xl">
       <div className="container-shell flex h-20 items-center justify-between gap-4">
-        <Link href="/" className="flex items-center gap-3">
-          <div className="flex size-11 items-center justify-center rounded-2xl bg-linear-to-br from-primary via-primary to-secondary text-sm font-semibold text-primary-foreground shadow-[0_16px_32px_-20px_rgba(18,110,130,0.8)]">
-            vw
-          </div>
-          <div className="space-y-0.5">
-            <p className="text-xl font-semibold tracking-tight text-primary-dark">villawe</p>
-            <p className="text-xs text-muted-foreground">Seçkin villa seçkisi</p>
-          </div>
+        <Link href="/" className="flex items-center">
+          <Image
+            src="/images/branding/villawe-wordmark-primary-on-white-crop.png"
+            alt="Villawe"
+            width={790}
+            height={220}
+            priority
+            className="h-auto w-[130px] sm:w-[158px] lg:w-[172px]"
+          />
         </Link>
 
         <nav className="hidden items-center gap-1 lg:flex">
@@ -96,9 +98,14 @@ export function SiteHeader() {
           </SheetTrigger>
           <SheetContent side="right" className="w-[88vw] max-w-sm border-l border-border bg-card">
             <SheetHeader className="border-b border-border/70 pb-5">
-              <SheetTitle className="flex items-center gap-2 text-primary-dark">
-                <Sparkles className="size-4 text-accent" />
-                villawe
+              <SheetTitle>
+                <Image
+                  src="/images/branding/villawe-wordmark-primary-on-white-crop.png"
+                  alt="Villawe"
+                  width={790}
+                  height={220}
+                  className="h-auto w-[138px]"
+                />
               </SheetTitle>
               <SheetDescription>
                 Seçkin villaları sade ve güvenli bir akışla keşfedin.
