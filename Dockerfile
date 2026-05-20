@@ -2,7 +2,8 @@ FROM node:22-alpine AS deps
 WORKDIR /app
 COPY package.json package-lock.json prisma.config.ts ./
 COPY prisma ./prisma
-RUN npm ci
+# Coolify may expose production-oriented env at build time; include dev deps so Next/Tailwind build tools are always available.
+RUN npm ci --include=dev
 
 FROM node:22-alpine AS builder
 WORKDIR /app
