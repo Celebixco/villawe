@@ -15,7 +15,6 @@ import { HeroSearchBox } from "@/components/public/hero-search-box";
 import { RegionCard } from "@/components/public/region-card";
 import { SectionHeading } from "@/components/public/section-heading";
 import { TrustFeatureRow } from "@/components/public/trust-feature-row";
-import { VillaConceptsSection } from "@/components/public/villa-concepts-section";
 import { VillaCard } from "@/components/public/villa-card";
 import { DataSourceNotice } from "@/components/shared/data-source-notice";
 import { Badge } from "@/components/ui/badge";
@@ -317,7 +316,51 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <VillaConceptsSection />
+      <section id="konseptler" className="container-shell py-12">
+        <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
+          <Card className="villawe-panel overflow-hidden">
+            <CardContent className="space-y-5 p-7 sm:p-8">
+              <div className="space-y-3">
+                <p className="section-kicker">Villa Konseptleri</p>
+                <h2 className="text-4xl font-semibold tracking-tight text-primary-dark">
+                  Tatil tarzınıza göre seçin
+                </h2>
+              </div>
+              <Link
+                href="/villa-kiralama"
+                className={buttonVariants({
+                  variant: "outline",
+                  className: "rounded-full",
+                })}
+              >
+                Tüm Konseptleri Keşfet
+              </Link>
+            </CardContent>
+          </Card>
+
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            {data.concepts.slice(0, 6).map((concept) => (
+              <Link
+                key={concept.slug}
+                href={`/${concept.slug}`}
+                className="villawe-soft-panel flex min-h-[10rem] flex-col justify-between p-5 transition duration-300 hover:-translate-y-1 hover:border-primary/18 hover:shadow-[0_24px_60px_-36px_rgba(18,110,130,0.24)]"
+              >
+                <div className="flex size-12 items-center justify-center rounded-2xl bg-card text-primary shadow-[0_18px_38px_-30px_rgba(18,110,130,0.26)]">
+                  <Sparkles className="size-5" />
+                </div>
+                <div className="space-y-2">
+                  <h3 className="text-2xl font-semibold tracking-tight text-foreground">
+                    {concept.name}
+                  </h3>
+                  <p className="line-clamp-2 text-sm leading-7 text-muted-foreground">
+                    {concept.description}
+                  </p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
 
       <section className="container-shell py-12">
         <SectionHeading
